@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>河南省网络拓扑可视化大屏</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:"Microsoft YaHei",sans-serif;background:linear-gradient(135deg,#0a1628 0%,#1a2a4a 50%,#0d1f3c 100%);color:#e0e8f0;overflow:hidden}
@@ -21,9 +19,7 @@
     .left-panel{grid-row:2;grid-column:1}
     .right-panel{grid-row:2;grid-column:3}
     .center-area{grid-row:2;grid-column:2;position:relative;background:rgba(10,30,60,0.4);border:1px solid rgba(64,158,255,0.3);border-radius:4px;overflow:hidden}
-    #map{width:100%;height:100%;border-radius:4px}
-    .leaflet-container{background:#0a1628}
-    .leaflet-tile-pane{filter:brightness(0.7) saturate(1.2)}
+    #map-container{width:100%;height:100%}
     .module{margin-bottom:16px}
     .module-title{font-size:13px;color:#8ab4f8;margin-bottom:10px;display:flex;align-items:center;gap:6px}
     .module-title::before{content:'';width:3px;height:12px;background:#4a9eff;border-radius:2px}
@@ -66,11 +62,6 @@
     .legend-color.basic{background:#4a9eff}
     .legend-color.business{background:#4ade80}
     .legend-color.priority{background:#fb923c}
-    .city-marker{background:radial-gradient(circle,rgba(74,158,255,0.8) 0%,rgba(74,158,255,0) 70%);border-radius:50%;display:flex;align-items:center;justify-content:center}
-    .city-marker.center{background:radial-gradient(circle,rgba(248,113,113,0.8) 0%,rgba(248,113,113,0) 70%)}
-    .city-label{background:rgba(10,30,60,0.8);color:#fff;padding:2px 6px;border-radius:3px;font-size:11px;white-space:nowrap;border:1px solid rgba(74,158,255,0.5)}
-    .city-label.center{color:#f87171;border-color:rgba(248,113,113,0.5)}
-    .line-label{background:rgba(10,30,60,0.7);color:#4ade80;padding:1px 4px;border-radius:2px;font-size:10px}
   </style>
 </head>
 <body>
@@ -78,7 +69,7 @@
   <div class="header">
     <h1>河南省网络拓扑可视化大屏</h1>
     <div class="header-info">
-      <span class="time" id="current-time">2026-03-25 14:45:00</span>
+      <span class="time" id="current-time">2026-03-25 14:50:00</span>
       <span class="status">● 正常</span>
       <span class="user">admin</span>
     </div>
@@ -123,7 +114,7 @@
   </div>
 
   <div class="center-area">
-    <div id="map"></div>
+    <div id="map-container"></div>
     <div class="legend">
       <div class="legend-item"><div class="legend-color basic"></div><span>基础网络</span></div>
       <div class="legend-item"><div class="legend-color business"></div><span>业务流量</span></div>
@@ -156,128 +147,309 @@
   </div>
 </div>
 
+<!-- 高德地图 JS API -->
+<script src="https://webapi.amap.com/maps?v=2.0&key=your_amap_key"></script>
 <script>
+// 如果高德地图加载失败，使用 ECharts 方案
+window.onerror = function(msg, url, line) {
+  if (msg.includes('AMap')) {
+    console.log('高德地图加载失败，使用 ECharts 方案');
+    loadEChartsMap();
+  }
+};
+
+function loadEChartsMap() {
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js';
+  script.onload = function() {
+    initEChartsMap();
+  };
+  document.head.appendChild(script);
+}
+
+function initEChartsMap() {
+  const chart = echarts.init(document.getElementById('map-container'));
+  
+  // 显示加载提示
+  chart.showLoading({text:'正在加载地图...',color:'#4a9eff',maskColor:'rgba(10,30,60,0.9)'});
+  
+  // 加载 GeoJSON
+  fetch('https://geo.datav.aliyun.com/areas_v3/bound/410000_full.json')
+    .then(res => res.json())
+    .then(geoJson => {
+      chart.hideLoading();
+      echarts.registerMap('henan', geoJson);
+      
+      // 地市数据
+      const mapData = geoJson.features.map(f => ({
+        name: f.properties.name,
+        value: Math.random() * 100 + 50
+      }));
+      
+      // 地市坐标
+      const geoCoordMap = {
+        '郑州市': [113.665412, 34.757975],
+        '开封市': [114.307581, 34.797239],
+        '洛阳市': [112.454026, 34.619685],
+        '平顶山市': [113.192661, 33.766168],
+        '安阳市': [114.392943, 36.097767],
+        '鹤壁市': [114.297267, 35.747234],
+        '新乡市': [113.92688, 35.302655],
+        '焦作市': [113.238299, 35.215903],
+        '濮阳市': [115.029215, 35.762341],
+        '许昌市': [113.852392, 34.035744],
+        '漯河市': [114.046061, 33.576859],
+        '三门峡市': [111.200135, 34.773386],
+        '南阳市': [112.528321, 32.990952],
+        '商丘市': [115.656037, 34.414172],
+        '信阳市': [114.091934, 32.147023],
+        '周口市': [114.696851, 33.625627],
+        '驻马店市': [114.022294, 32.980032],
+        '济源市': [112.602421, 35.067229]
+      };
+      
+      // 拓扑连线
+      const zzCoord = geoCoordMap['郑州市'];
+      const lines = Object.keys(geoCoordMap).filter(c => c !== '郑州市').map(city => ({
+        coords: [zzCoord, geoCoordMap[city]],
+        lineStyle: {
+          color: ['#4a9eff', '#4ade80', '#fb923c'][Math.floor(Math.random() * 3)],
+          width: 1.5
+        }
+      }));
+      
+      // 散点数据
+      const scatterData = Object.keys(geoCoordMap).map(city => ({
+        name: city.replace('市', ''),
+        value: [...geoCoordMap[city], Math.random() * 100 + 50]
+      }));
+      
+      const option = {
+        backgroundColor: 'transparent',
+        tooltip: { trigger: 'item', formatter: '{b}' },
+        visualMap: {
+          show: false,
+          min: 0,
+          max: 150,
+          inRange: {
+            color: ['#1e3a8a', '#1e40af', '#2563eb', '#3b82f6', '#60a5fa']
+          }
+        },
+        geo: {
+          map: 'henan',
+          roam: true,
+          zoom: 1.2,
+          center: [113.5, 34],
+          label: {
+            show: true,
+            color: '#fff',
+            fontSize: 10,
+            formatter: '{b}'
+          },
+          itemStyle: {
+            areaColor: '#1e3a8a',
+            borderColor: '#60a5fa',
+            borderWidth: 1.5,
+            shadowColor: 'rgba(74,158,255,0.3)',
+            shadowBlur: 10
+          },
+          emphasis: {
+            label: { show: true, color: '#4ade80', fontSize: 11, fontWeight: 'bold' },
+            itemStyle: { areaColor: '#2563eb', borderColor: '#4ade80', borderWidth: 2 }
+          },
+          select: {
+            itemStyle: { areaColor: '#1d4ed8' }
+          }
+        },
+        series: [
+          // 地图（带颜色填充）
+          {
+            type: 'map',
+            map: 'henan',
+            geoIndex: 0,
+            data: mapData
+          },
+          // 拓扑连线
+          {
+            type: 'lines',
+            coordinateSystem: 'geo',
+            zlevel: 2,
+            effect: {
+              show: true,
+              period: 3,
+              trailLength: 0.1,
+              symbol: 'arrow',
+              symbolSize: 4,
+              color: '#4ade80',
+              loop: true
+            },
+            lineStyle: {
+              color: '#4a9eff',
+              width: 1.5,
+              curveness: 0.1,
+              opacity: 0.6
+            },
+            data: lines
+          },
+          // 地市节点
+          {
+            type: 'effectScatter',
+            coordinateSystem: 'geo',
+            zlevel: 3,
+            data: scatterData,
+            symbolSize: 8,
+            itemStyle: {
+              color: '#4ade80',
+              shadowBlur: 10,
+              shadowColor: 'rgba(74,222,128,0.5)'
+            },
+            label: {
+              show: true,
+              formatter: '{b}',
+              position: 'right',
+              color: '#fff',
+              fontSize: 9
+            }
+          },
+          // 郑州核心节点
+          {
+            type: 'effectScatter',
+            coordinateSystem: 'geo',
+            zlevel: 4,
+            data: [{
+              name: '郑州核心',
+              value: [...zzCoord, 100]
+            }],
+            symbolSize: 16,
+            itemStyle: {
+              color: '#f87171',
+              shadowBlur: 15,
+              shadowColor: 'rgba(248,113,113,0.6)'
+            },
+            label: {
+              show: true,
+              formatter: '郑州核心',
+              position: 'top',
+              color: '#f87171',
+              fontSize: 11,
+              fontWeight: 'bold'
+            }
+          }
+        ]
+      };
+      
+      chart.setOption(option);
+      window.addEventListener('resize', () => chart.resize());
+    })
+    .catch(err => {
+      chart.hideLoading();
+      document.getElementById('map-container').innerHTML = '<div style="color:#f87171;text-align:center;padding-top:200px;">地图加载失败<br><br>可能原因：<br>1. 网络无法访问阿里云 DataV<br>2. 浏览器阻止了跨域请求<br><br>请检查网络或使用其他浏览器</div>';
+    });
+}
+
 // 更新时间
-function updateTime(){document.getElementById('current-time').textContent=new Date().toLocaleString('zh-CN',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).replace(/\//g,'-')}
-setInterval(updateTime,1000);updateTime();
-
-// 地市坐标（经纬度）
-const cities=[
-  {name:'郑州',lat:34.757975,lng:113.665412,center:true},
-  {name:'开封',lat:34.797239,lng:114.307581},
-  {name:'洛阳',lat:34.619685,lng:112.454026},
-  {name:'平顶山',lat:33.766168,lng:113.192661},
-  {name:'安阳',lat:36.097767,lng:114.392943},
-  {name:'鹤壁',lat:35.747234,lng:114.297267},
-  {name:'新乡',lat:35.302655,lng:113.92688},
-  {name:'焦作',lat:35.215903,lng:113.238299},
-  {name:'濮阳',lat:35.762341,lng:115.029215},
-  {name:'许昌',lat:34.035744,lng:113.852392},
-  {name:'漯河',lat:33.576859,lng:114.046061},
-  {name:'三门峡',lat:34.773386,lng:111.200135},
-  {name:'南阳',lat:32.990952,lng:112.528321},
-  {name:'商丘',lat:34.414172,lng:115.656037},
-  {name:'信阳',lat:32.147023,lng:114.091934},
-  {name:'周口',lat:33.625627,lng:114.696851},
-  {name:'驻马店',lat:32.980032,lng:114.022294}
-];
-
-let map;
-function initMap(){
-  // 创建地图（以郑州为中心）
-  map=L.map('map',{center:[34.5,113.7],zoom:7,zoomControl:false,attributionControl:false});
-  
-  // 使用深色地图底图（CartoDB Dark Matter）
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
-    maxZoom:19
-  }).addTo(map);
-  
-  const zz=cities.find(c=>c.center);
-  
-  // 绘制拓扑连线
-  cities.filter(c=>!c.center).forEach(city=>{
-    const colors=['#4a9eff','#4ade80','#fb923c'];
-    const color=colors[Math.abs(city.name.charCodeAt(0))%3];
-    
-    // 创建曲线
-    const latlngs=[[zz.lat,zz.lng],[city.lat,city.lng]];
-    const line=L.polyline(latlngs,{color:color,weight:2,opacity:0.6,dashArray:'5,10'}).addTo(map);
-    
-    // 添加动画效果（通过不断更新 dashOffset）
-    let offset=0;
-    setInterval(()=>{offset=(offset+1)%10;line.setStyle({dashOffset:-offset});},100);
-  });
-  
-  // 绘制地市节点
-  cities.forEach(city=>{
-    const size=city.center?20:14;
-    const icon=L.divIcon({
-      className:'',
-      html:`<div class="city-marker${city.center?' center':''}" style="width:${size*2}px;height:${size*2}px;"></div>`,
-      iconSize:[size*2,size*2],
-      iconAnchor:[size,size]
-    });
-    
-    L.marker([city.lat,city.lng],{icon:icon}).addTo(map);
-    
-    // 添加标签
-    const labelIcon=L.divIcon({
-      className:'',
-      html:`<div class="city-label${city.center?' center':''}">${city.name}${city.center?'核心':''}</div>`,
-      iconSize:[60,20],
-      iconAnchor:[30,city.center?-25:-15]
-    });
-    
-    L.marker([city.lat,city.lng],{icon:labelIcon}).addTo(map);
-  });
+function updateTime() {
+  document.getElementById('current-time').textContent = new Date().toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  }).replace(/\//g, '-');
 }
+setInterval(updateTime, 1000);
+updateTime();
 
-function drawRing(id,pct,c1,c2){
-  const canvas=document.getElementById(id);if(!canvas)return;
-  const ctx=canvas.getContext('2d');
-  canvas.width=120;canvas.height=120;
-  ctx.beginPath();ctx.arc(60,60,50,0,Math.PI*2);
-  ctx.strokeStyle='rgba(64,158,255,0.2)';ctx.lineWidth=10;ctx.stroke();
-  const g=ctx.createLinearGradient(0,0,120,120);g.addColorStop(0,c1);g.addColorStop(1,c2);
-  ctx.beginPath();ctx.arc(60,60,50,-Math.PI/2,-Math.PI/2+(pct/100)*Math.PI*2);
-  ctx.strokeStyle=g;ctx.lineWidth=10;ctx.lineCap='round';ctx.stroke();
-}
-
-function drawLineChart(){
-  const canvas=document.getElementById('traffic-chart');if(!canvas)return;
-  const ctx=canvas.getContext('2d');
-  canvas.width=canvas.offsetWidth*2;canvas.height=canvas.offsetHeight*2;
-  ctx.scale(2,2);
-  const w=canvas.offsetWidth,h=canvas.offsetHeight,pad=10;
-  const data=Array.from({length:24},(_,i)=>3+Math.random()*5+Math.sin(i/3)*2);
-  const max=Math.max(...data);
-  ctx.beginPath();ctx.moveTo(pad,h-pad);
-  data.forEach((v,i)=>{const x=pad+i*(w-2*pad)/23,y=h-pad-(v/max)*(h-2*pad);ctx.lineTo(x,y);});
-  ctx.lineTo(pad+23*(w-2*pad)/23,h-pad);ctx.closePath();
-  const g=ctx.createLinearGradient(0,0,0,h);g.addColorStop(0,'rgba(74,158,255,0.3)');g.addColorStop(1,'rgba(74,158,255,0)');
-  ctx.fillStyle=g;ctx.fill();
-  ctx.beginPath();ctx.strokeStyle='#4a9eff';ctx.lineWidth=2;
-  data.forEach((v,i)=>{const x=pad+i*(w-2*pad)/23,y=h-pad-(v/max)*(h-2*pad);i?ctx.lineTo(x,y):ctx.moveTo(x,y);});
+// 绘制环形图
+function drawRing(id, pct, c1, c2) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  canvas.width = 120;
+  canvas.height = 120;
+  ctx.beginPath();
+  ctx.arc(60, 60, 50, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(64,158,255,0.2)';
+  ctx.lineWidth = 10;
+  ctx.stroke();
+  const g = ctx.createLinearGradient(0, 0, 120, 120);
+  g.addColorStop(0, c1);
+  g.addColorStop(1, c2);
+  ctx.beginPath();
+  ctx.arc(60, 60, 50, -Math.PI / 2, -Math.PI / 2 + (pct / 100) * Math.PI * 2);
+  ctx.strokeStyle = g;
+  ctx.lineWidth = 10;
+  ctx.lineCap = 'round';
   ctx.stroke();
 }
 
-function updateData(){
-  const health=(95+Math.random()*5).toFixed(1);
-  document.getElementById('health-value').textContent=health+'%';
-  drawRing('health-ring',parseFloat(health),'#4ade80','#22c55e');
-  const load=(60+Math.random()*20).toFixed(1);
-  document.getElementById('load-value').textContent=load+'%';
-  drawRing('load-ring',parseFloat(load),'#4a9eff','#60a5fa');
-  document.getElementById('online-count').textContent=1000+Math.floor(Math.random()*50);
-  document.getElementById('offline-count').textContent=Math.floor(Math.random()*5);
+// 绘制折线图
+function drawLineChart() {
+  const canvas = document.getElementById('traffic-chart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth * 2;
+  canvas.height = canvas.offsetHeight * 2;
+  ctx.scale(2, 2);
+  const w = canvas.offsetWidth;
+  const h = canvas.offsetHeight;
+  const pad = 10;
+  const data = Array.from({ length: 24 }, (_, i) => 3 + Math.random() * 5 + Math.sin(i / 3) * 2);
+  const max = Math.max(...data);
+  
+  ctx.beginPath();
+  ctx.moveTo(pad, h - pad);
+  data.forEach((v, i) => {
+    const x = pad + i * (w - 2 * pad) / 23;
+    const y = h - pad - (v / max) * (h - 2 * pad);
+    ctx.lineTo(x, y);
+  });
+  ctx.lineTo(pad + 23 * (w - 2 * pad) / 23, h - pad);
+  ctx.closePath();
+  const g = ctx.createLinearGradient(0, 0, 0, h);
+  g.addColorStop(0, 'rgba(74,158,255,0.3)');
+  g.addColorStop(1, 'rgba(74,158,255,0)');
+  ctx.fillStyle = g;
+  ctx.fill();
+  
+  ctx.beginPath();
+  ctx.strokeStyle = '#4a9eff';
+  ctx.lineWidth = 2;
+  data.forEach((v, i) => {
+    const x = pad + i * (w - 2 * pad) / 23;
+    const y = h - pad - (v / max) * (h - 2 * pad);
+    i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+  });
+  ctx.stroke();
 }
 
-window.onload=function(){
-  initMap();
-  drawRing('health-ring',98.5,'#4ade80','#22c55e');
-  drawRing('load-ring',67.2,'#4a9eff','#60a5fa');
+// 更新数据
+function updateData() {
+  const health = (95 + Math.random() * 5).toFixed(1);
+  document.getElementById('health-value').textContent = health + '%';
+  drawRing('health-ring', parseFloat(health), '#4ade80', '#22c55e');
+  
+  const load = (60 + Math.random() * 20).toFixed(1);
+  document.getElementById('load-value').textContent = load + '%';
+  drawRing('load-ring', parseFloat(load), '#4a9eff', '#60a5fa');
+  
+  document.getElementById('online-count').textContent = 1000 + Math.floor(Math.random() * 50);
+  document.getElementById('offline-count').textContent = Math.floor(Math.random() * 5);
+}
+
+// 初始化
+window.onload = function() {
+  // 尝试使用高德地图，如果失败则使用 ECharts
+  if (typeof AMap === 'undefined') {
+    loadEChartsMap();
+  }
+  
+  drawRing('health-ring', 98.5, '#4ade80', '#22c55e');
+  drawRing('load-ring', 67.2, '#4a9eff', '#60a5fa');
   drawLineChart();
-  setInterval(updateData,3000);
+  setInterval(updateData, 3000);
 };
 </script>
 </body>
