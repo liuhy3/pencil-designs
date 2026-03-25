@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>河南省网络拓扑可视化大屏</title>
   <script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
-  <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:"Microsoft YaHei",sans-serif;background:linear-gradient(135deg,#0a1628 0%,#1a2a4a 50%,#0d1f3c 100%);color:#e0e8f0;overflow:hidden}
@@ -61,7 +60,7 @@
     <div class="header">
       <h1>河南省网络拓扑可视化大屏</h1>
       <div class="header-info">
-        <span class="time" id="current-time">2026-03-25 17:25:00</span>
+        <span class="time" id="current-time">2026-03-25 17:35:00</span>
         <span class="status">系统正常</span>
       </div>
     </div>
@@ -194,138 +193,140 @@
     // 初始化地图
     const chart = echarts.init(document.getElementById('map'));
     
-    // 使用 jQuery 加载阿里云 GeoJSON（完全按照你的示例）
-    $(async function () {
-      const geoUrl = "https://geo.datav.aliyun.com/areas_v3/bound/410000_full.json";
-      const geoJson = await $.getJSON(geoUrl);
-      
-      // 注册地图
-      echarts.registerMap('Henan', geoJson);
-      
-      const option = {
-        backgroundColor: 'transparent',
-        tooltip: {
-          trigger: 'item',
-          backgroundColor: 'rgba(10,30,60,0.9)',
-          borderColor: '#4a9eff',
-          textStyle: { color: '#e0e8f0' }
-        },
-        geo: {
-          map: 'Henan',
-          roam: true,
-          zoom: 1.1,
-          center: [113.5, 34.2],
-          label: {
-            show: true,
-            color: '#8ab4f8',
-            fontSize: 10
-          },
-          itemStyle: {
-            areaColor: '#1a3a5c',
+    // 从阿里云加载 GeoJSON
+    fetch('https://geo.datav.aliyun.com/areas_v3/bound/410000_full.json')
+      .then(res => res.json())
+      .then(geoJson => {
+        echarts.registerMap('Henan', geoJson);
+        
+        const option = {
+          backgroundColor: 'transparent',
+          tooltip: {
+            trigger: 'item',
+            backgroundColor: 'rgba(10,30,60,0.9)',
             borderColor: '#4a9eff',
-            borderWidth: 1,
-            shadowColor: 'rgba(74,158,255,0.3)',
-            shadowBlur: 10
+            textStyle: { color: '#e0e8f0' }
           },
-          emphasis: {
-            itemStyle: {
-              areaColor: '#2a5a8c',
-              borderColor: '#4ade80',
-              borderWidth: 2
-            },
+          geo: {
+            map: 'Henan',
+            roam: true,
+            zoom: 1.1,
+            center: [113.5, 34.2],
             label: {
-              color: '#4ade80',
-              fontSize: 12,
-              fontWeight: 'bold'
-            }
-          }
-        },
-        series: [
-          // 拓扑连线
-          {
-            type: 'lines',
-            coordinateSystem: 'geo',
-            zlevel: 2,
-            effect: {
               show: true,
-              period: 4,
-              trailLength: 0.2,
-              symbol: 'arrow',
-              symbolSize: 5,
-              color: '#4ade80'
-            },
-            lineStyle: {
-              color: '#4a9eff',
-              width: 1.5,
-              curveness: 0.2,
-              opacity: 0.6
-            },
-            data: topoLines
-          },
-          // 地市节点
-          {
-            type: 'scatter',
-            coordinateSystem: 'geo',
-            zlevel: 3,
-            symbol: 'circle',
-            symbolSize: function(val) {
-              return Math.max(8, val[2] / 3);
+              color: '#8ab4f8',
+              fontSize: 10
             },
             itemStyle: {
-              color: function(params) {
-                return params.name === '郑州' ? '#f87171' : '#4a9eff';
-              },
-              shadowColor: 'rgba(74,158,255,0.5)',
+              areaColor: '#1a3a5c',
+              borderColor: '#4a9eff',
+              borderWidth: 1,
+              shadowColor: 'rgba(74,158,255,0.3)',
               shadowBlur: 10
-            },
-            label: {
-              show: true,
-              formatter: '{b}',
-              position: 'right',
-              color: '#e0e8f0',
-              fontSize: 11
             },
             emphasis: {
               itemStyle: {
-                color: '#4ade80',
-                borderColor: '#fff',
+                areaColor: '#2a5a8c',
+                borderColor: '#4ade80',
                 borderWidth: 2
+              },
+              label: {
+                color: '#4ade80',
+                fontSize: 12,
+                fontWeight: 'bold'
               }
-            },
-            data: cityNodes
+            }
           },
-          // 郑州核心节点（脉动效果）
-          {
-            type: 'effectScatter',
-            coordinateSystem: 'geo',
-            zlevel: 4,
-            symbol: 'circle',
-            symbolSize: 18,
-            rippleEffect: {
-              brushType: 'stroke',
-              scale: 3,
-              period: 2
+          series: [
+            // 拓扑连线
+            {
+              type: 'lines',
+              coordinateSystem: 'geo',
+              zlevel: 2,
+              effect: {
+                show: true,
+                period: 4,
+                trailLength: 0.2,
+                symbol: 'arrow',
+                symbolSize: 5,
+                color: '#4ade80'
+              },
+              lineStyle: {
+                color: '#4a9eff',
+                width: 1.5,
+                curveness: 0.2,
+                opacity: 0.6
+              },
+              data: topoLines
             },
-            itemStyle: {
-              color: '#f87171',
-              shadowColor: 'rgba(248,113,113,0.5)',
-              shadowBlur: 20
+            // 地市节点
+            {
+              type: 'scatter',
+              coordinateSystem: 'geo',
+              zlevel: 3,
+              symbol: 'circle',
+              symbolSize: function(val) {
+                return Math.max(8, val[2] / 3);
+              },
+              itemStyle: {
+                color: function(params) {
+                  return params.name === '郑州' ? '#f87171' : '#4a9eff';
+                },
+                shadowColor: 'rgba(74,158,255,0.5)',
+                shadowBlur: 10
+              },
+              label: {
+                show: true,
+                formatter: '{b}',
+                position: 'right',
+                color: '#e0e8f0',
+                fontSize: 11
+              },
+              emphasis: {
+                itemStyle: {
+                  color: '#4ade80',
+                  borderColor: '#fff',
+                  borderWidth: 2
+                }
+              },
+              data: cityNodes
             },
-            label: {
-              show: true,
-              formatter: '郑州核心',
-              position: 'top',
-              color: '#f87171',
-              fontSize: 12,
-              fontWeight: 'bold'
-            },
-            data: [{ name: '郑州核心', value: cityCoords['郑州市'] }]
-          }
-        ]
-      };
-      
-      chart.setOption(option);
-    });
+            // 郑州核心节点（脉动效果）
+            {
+              type: 'effectScatter',
+              coordinateSystem: 'geo',
+              zlevel: 4,
+              symbol: 'circle',
+              symbolSize: 18,
+              rippleEffect: {
+                brushType: 'stroke',
+                scale: 3,
+                period: 2
+              },
+              itemStyle: {
+                color: '#f87171',
+                shadowColor: 'rgba(248,113,113,0.5)',
+                shadowBlur: 20
+              },
+              label: {
+                show: true,
+                formatter: '郑州核心',
+                position: 'top',
+                color: '#f87171',
+                fontSize: 12,
+                fontWeight: 'bold'
+              },
+              data: [{ name: '郑州核心', value: cityCoords['郑州市'] }]
+            }
+          ]
+        };
+        
+        chart.setOption(option);
+      })
+      .catch(err => {
+        console.error('地图加载失败:', err);
+        document.getElementById('map').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#f87171">地图加载失败</div>';
+      });
     
     // 健康度环形图
     const healthChart = echarts.init(document.getElementById('health-chart'));
@@ -363,7 +364,7 @@
     
     // 流量趋势图
     const trafficChart = echarts.init(document.getElementById('traffic-chart'));
-    const hours = Array.from({length: 24}, (_, i) => `${i}:00`);
+    const hours = Array.from({length: 24}, (_, i) => \`\${i}:00\`);
     const trafficData = [12, 15, 18, 22, 28, 35, 42, 48, 52, 55, 58, 62, 65, 63, 60, 55, 52, 48, 45, 40, 35, 28, 22, 18];
     
     trafficChart.setOption({
