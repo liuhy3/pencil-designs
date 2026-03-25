@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>河南省网络拓扑可视化大屏</title>
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:"Microsoft YaHei",sans-serif;background:linear-gradient(135deg,#0a1628 0%,#1a2a4a 50%,#0d1f3c 100%);color:#e0e8f0;overflow:hidden}
@@ -19,13 +20,12 @@
     .left-panel{grid-row:2;grid-column:1}
     .right-panel{grid-row:2;grid-column:3}
     .center-area{grid-row:2;grid-column:2;position:relative;background:rgba(10,30,60,0.4);border:1px solid rgba(64,158,255,0.3);border-radius:4px;overflow:hidden}
-    #map-chart{width:100%;height:100%}
+    #map{width:100%;height:100%}
     .loading{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#4a9eff;font-size:16px}
     .module{margin-bottom:16px}
     .module-title{font-size:13px;color:#8ab4f8;margin-bottom:10px;display:flex;align-items:center;gap:6px}
     .module-title::before{content:'';width:3px;height:12px;background:#4a9eff;border-radius:2px}
     .ring-chart{width:120px;height:120px;margin:0 auto 10px;position:relative}
-    .ring-value{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:24px;font-weight:bold;color:#4ade80}
     .device-status{display:flex;justify-content:space-around;padding:10px 0}
     .device-item{text-align:center}
     .device-value{font-size:24px;font-weight:bold}
@@ -62,7 +62,7 @@
     <div class="header">
       <h1>河南省网络拓扑可视化大屏</h1>
       <div class="header-info">
-        <span class="time" id="current-time">2026-03-25 17:10:00</span>
+        <span class="time" id="current-time">2026-03-25 17:15:00</span>
         <span class="status">系统正常</span>
       </div>
     </div>
@@ -120,7 +120,7 @@
     </div>
     
     <div class="center-area">
-      <div id="map-chart"></div>
+      <div id="map"></div>
       <div class="loading" id="map-loading">正在加载地图...</div>
       <div class="legend">
         <div class="legend-item"><div class="legend-color basic"></div><span>基础网络</span></div>
@@ -194,14 +194,18 @@
     }));
     
     // 初始化地图
-    const mapChart = echarts.init(document.getElementById('map-chart'));
+    const mapChart = echarts.init(document.getElementById('map'));
     
-    // 从阿里云 DataV 加载 GeoJSON
-    fetch('https://geo.datav.aliyun.com/areas_v3/bound/410000_full.json')
-      .then(res => res.json())
-      .then(geoJson => {
+    // 使用 jQuery 加载阿里云 GeoJSON
+    $(async function () {
+      const geoUrl = "https://geo.datav.aliyun.com/areas_v3/bound/410000_full.json";
+      
+      try {
+        const geoJson = await $.getJSON(geoUrl);
         document.getElementById('map-loading').style.display = 'none';
-        echarts.registerMap('henan', geoJson);
+        
+        // 注册地图
+        echarts.registerMap('Henan', geoJson);
         
         const option = {
           backgroundColor: 'transparent',
@@ -212,7 +216,7 @@
             textStyle: { color: '#e0e8f0' }
           },
           geo: {
-            map: 'henan',
+            map: 'Henan',
             roam: true,
             zoom: 1.1,
             center: [113.5, 34.2],
@@ -326,11 +330,11 @@
         };
         
         mapChart.setOption(option);
-      })
-      .catch(err => {
+      } catch (err) {
         console.error('加载地图数据失败:', err);
         document.getElementById('map-loading').innerHTML = '<span style="color:#f87171">地图加载失败：' + err.message + '</span>';
-      });
+      }
+    });
     
     // 健康度环形图
     const healthChart = echarts.init(document.getElementById('health-chart'));
