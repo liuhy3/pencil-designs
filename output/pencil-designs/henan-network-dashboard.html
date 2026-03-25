@@ -14,18 +14,16 @@
     .header-info{position:absolute;right:20px;display:flex;align-items:center;gap:20px;font-size:14px}
     .header-info .time{color:#8ab4f8;font-family:Consolas,monospace}
     .header-info .status{background:#1a5a2a;color:#4ade80;padding:4px 12px;border-radius:4px;font-size:12px}
-    .header-info .user{color:#8ab4f8}
     .panel{background:rgba(10,30,60,0.6);border:1px solid rgba(64,158,255,0.3);border-radius:4px;padding:16px;display:flex;flex-direction:column}
     .panel-title{font-size:16px;font-weight:bold;color:#4a9eff;padding-bottom:12px;border-bottom:1px solid rgba(64,158,255,0.3);margin-bottom:16px}
     .left-panel{grid-row:2;grid-column:1}
     .right-panel{grid-row:2;grid-column:3}
-    .center-area{grid-row:2;grid-column:2;position:relative;background:rgba(10,30,60,0.4);border:1px solid rgba(64,158,255,0.3);border-radius:4px}
+    .center-area{grid-row:2;grid-column:2;position:relative;background:rgba(10,30,60,0.4);border:1px solid rgba(64,158,255,0.3);border-radius:4px;overflow:hidden}
     #map-chart{width:100%;height:100%}
     .module{margin-bottom:16px}
     .module-title{font-size:13px;color:#8ab4f8;margin-bottom:10px;display:flex;align-items:center;gap:6px}
     .module-title::before{content:'';width:3px;height:12px;background:#4a9eff;border-radius:2px}
     .ring-chart{width:120px;height:120px;margin:0 auto 10px;position:relative}
-    .ring-chart canvas{width:100%;height:100%}
     .ring-value{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:24px;font-weight:bold;color:#4ade80}
     .device-status{display:flex;justify-content:space-around;padding:10px 0}
     .device-item{text-align:center}
@@ -44,19 +42,18 @@
     .alert-table{width:100%;font-size:12px}
     .alert-table th{color:#8ab4f8;text-align:left;padding:8px 4px;border-bottom:1px solid rgba(64,158,255,0.3)}
     .alert-table td{padding:6px 4px;border-bottom:1px solid rgba(64,158,255,0.1)}
-    .alert-scroll{height:calc(100% - 30px);overflow-y:auto}
-    .line-chart{height:120px;margin:10px 0}
-    .line-chart canvas{width:100%;height:100%}
-    .top5-chart{height:150px}
-    .top5-bar-container{display:flex;flex-direction:column;gap:8px;height:100%;justify-content:space-around}
+    .top5-bar-container{display:flex;flex-direction:column;gap:8px;height:150px;justify-content:space-around}
     .top5-bar-item{display:flex;align-items:center;gap:8px}
     .top5-label{width:50px;font-size:12px;color:#8ab4f8;text-align:right}
     .top5-bar-bg{flex:1;height:16px;background:rgba(64,158,255,0.2);border-radius:2px;overflow:hidden}
     .top5-bar-fill{height:100%;background:linear-gradient(to right,#2563eb,#4a9eff);border-radius:2px}
     .top5-value{width:50px;font-size:12px;color:#4ade80;text-align:right}
-    .load-chart{width:100px;height:100px;margin:0 auto;position:relative}
-    .load-chart canvas{width:100%;height:100%}
-    .load-value{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:18px;font-weight:bold;color:#4a9eff}
+    .legend{position:absolute;bottom:20px;right:20px;display:flex;gap:16px;font-size:12px;background:rgba(10,30,60,0.9);padding:8px 12px;border-radius:4px;z-index:1000}
+    .legend-item{display:flex;align-items:center;gap:6px}
+    .legend-color{width:20px;height:3px;border-radius:1px}
+    .legend-color.basic{background:#4a9eff}
+    .legend-color.business{background:#4ade80}
+    .legend-color.priority{background:#fb923c}
   </style>
 </head>
 <body>
@@ -64,23 +61,18 @@
     <div class="header">
       <h1>河南省网络拓扑可视化大屏</h1>
       <div class="header-info">
-        <span class="time" id="current-time">2026-03-25 14:56:45</span>
-        <span class="status">● 系统运行正常</span>
-        <span class="user">管理员</span>
+        <span class="time" id="current-time">2026-03-25 17:05:00</span>
+        <span class="status">系统正常</span>
       </div>
     </div>
     
     <div class="panel left-panel">
-      <div class="panel-title">网络状态概览</div>
-      
+      <div class="panel-title">网络概览</div>
       <div class="module">
         <div class="module-title">网络健康度</div>
-        <div class="ring-chart">
-          <canvas id="health-ring"></canvas>
-          <div class="ring-value">96.8%</div>
-        </div>
+        <div class="ring-chart" id="health-chart"></div>
+        <div style="text-align:center;font-size:12px;color:#8ab4f8">综合评分</div>
       </div>
-      
       <div class="module">
         <div class="module-title">设备状态</div>
         <div class="device-status">
@@ -98,36 +90,28 @@
           </div>
         </div>
       </div>
-      
       <div class="module">
         <div class="module-title">告警统计</div>
         <div class="bar-chart">
-          <div class="bar-item">
-            <div class="bar urgent"></div>
-            <div class="bar-label">紧急</div>
-          </div>
-          <div class="bar-item">
-            <div class="bar important"></div>
-            <div class="bar-label">重要</div>
-          </div>
-          <div class="bar-item">
-            <div class="bar normal"></div>
-            <div class="bar-label">一般</div>
-          </div>
+          <div class="bar-item"><div class="bar urgent"></div><div class="bar-label">紧急</div></div>
+          <div class="bar-item"><div class="bar important"></div><div class="bar-label">重要</div></div>
+          <div class="bar-item"><div class="bar normal"></div><div class="bar-label">一般</div></div>
+        </div>
+        <div style="display:flex;justify-content:space-around;font-size:12px;color:#8ab4f8;padding-top:8px">
+          <span>12</span><span>28</span><span>156</span>
         </div>
       </div>
-      
-      <div class="module alert-list">
-        <div class="module-title">实时告警列表</div>
-        <div class="alert-scroll">
+      <div class="module" style="flex:1">
+        <div class="module-title">异常列表</div>
+        <div class="alert-list">
           <table class="alert-table">
-            <thead><tr><th>时间</th><th>设备</th><th>告警</th></tr></thead>
-            <tbody>
-              <tr><td>14:52:18</td><td>郑州-核心01</td><td style="color:#f87171">CPU超限</td></tr>
-              <tr><td>14:48:33</td><td>洛阳-汇聚02</td><td style="color:#fbbf24">流量异常</td></tr>
-              <tr><td>14:45:12</td><td>开封-接入15</td><td style="color:#60a5fa">端口down</td></tr>
-              <tr><td>14:42:07</td><td>南阳-汇聚01</td><td style="color:#f87171">链路中断</td></tr>
-              <tr><td>14:38:45</td><td>信阳-核心01</td><td style="color:#fbbf24">内存告警</td></tr>
+            <thead><tr><th>设备</th><th>类型</th><th>时间</th></tr></thead>
+            <tbody id="alert-tbody">
+              <tr><td>郑州-核心-01</td><td style="color:#f87171">链路中断</td><td>17:02</td></tr>
+              <tr><td>洛阳-汇聚-03</td><td style="color:#fbbf24">流量异常</td><td>16:58</td></tr>
+              <tr><td>开封-接入-12</td><td style="color:#fbbf24">设备离线</td><td>16:45</td></tr>
+              <tr><td>新乡-汇聚-02</td><td style="color:#fbbf24">CPU过高</td><td>16:30</td></tr>
+              <tr><td>南阳-接入-08</td><td style="color:#60a5fa">端口告警</td><td>16:15</td></tr>
             </tbody>
           </table>
         </div>
@@ -136,345 +120,338 @@
     
     <div class="center-area">
       <div id="map-chart"></div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-color basic"></div><span>基础网络</span></div>
+        <div class="legend-item"><div class="legend-color business"></div><span>业务流量</span></div>
+        <div class="legend-item"><div class="legend-color priority"></div><span>高优先级</span></div>
+      </div>
     </div>
     
     <div class="panel right-panel">
       <div class="panel-title">流量分析</div>
-      
       <div class="module">
-        <div class="module-title">24小时流量趋势 (Gbps)</div>
-        <div class="line-chart">
-          <canvas id="traffic-line"></canvas>
+        <div class="module-title">24小时流量趋势</div>
+        <div id="traffic-chart" style="height:120px"></div>
+      </div>
+      <div class="module">
+        <div class="module-title">TOP5地市流量 (Gbps)</div>
+        <div class="top5-bar-container">
+          <div class="top5-bar-item"><div class="top5-label">郑州</div><div class="top5-bar-bg"><div class="top5-bar-fill" style="width:95%"></div></div><div class="top5-value">48.2</div></div>
+          <div class="top5-bar-item"><div class="top5-label">洛阳</div><div class="top5-bar-bg"><div class="top5-bar-fill" style="width:72%"></div></div><div class="top5-value">36.5</div></div>
+          <div class="top5-bar-item"><div class="top5-label">南阳</div><div class="top5-bar-bg"><div class="top5-bar-fill" style="width:58%"></div></div><div class="top5-value">29.3</div></div>
+          <div class="top5-bar-item"><div class="top5-label">新乡</div><div class="top5-bar-bg"><div class="top5-bar-fill" style="width:45%"></div></div><div class="top5-value">22.8</div></div>
+          <div class="top5-bar-item"><div class="top5-label">开封</div><div class="top5-bar-bg"><div class="top5-bar-fill" style="width:38%"></div></div><div class="top5-value">19.1</div></div>
         </div>
       </div>
-      
-      <div class="module">
-        <div class="module-title">TOP5地市流量</div>
-        <div class="top5-chart">
-          <div class="top5-bar-container">
-            <div class="top5-bar-item">
-              <span class="top5-label">郑州</span>
-              <div class="top5-bar-bg"><div class="top5-bar-fill" style="width:95%"></div></div>
-              <span class="top5-value">156.8</span>
-            </div>
-            <div class="top5-bar-item">
-              <span class="top5-label">洛阳</span>
-              <div class="top5-bar-bg"><div class="top5-bar-fill" style="width:72%"></div></div>
-              <span class="top5-value">118.5</span>
-            </div>
-            <div class="top5-bar-item">
-              <span class="top5-label">南阳</span>
-              <div class="top5-bar-bg"><div class="top5-bar-fill" style="width:58%"></div></div>
-              <span class="top5-value">95.2</span>
-            </div>
-            <div class="top5-bar-item">
-              <span class="top5-label">开封</span>
-              <div class="top5-bar-bg"><div class="top5-bar-fill" style="width:45%"></div></div>
-              <span class="top5-value">74.1</span>
-            </div>
-            <div class="top5-bar-item">
-              <span class="top5-label">新乡</span>
-              <div class="top5-bar-bg"><div class="top5-bar-fill" style="width:38%"></div></div>
-              <span class="top5-value">62.3</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      
       <div class="module">
         <div class="module-title">系统负载</div>
-        <div class="load-chart">
-          <canvas id="load-ring"></canvas>
-          <div class="load-value">67%</div>
-        </div>
+        <div id="load-chart" style="height:100px"></div>
       </div>
     </div>
   </div>
-
   <script>
-    // 河南省各地市 GeoJSON 数据（简化版，从阿里云 DataV 提取）
-    const henanGeoJSON = {"type":"FeatureCollection","features":[
-      {"type":"Feature","properties":{"adcode":410100,"name":"郑州市"},"geometry":{"type":"Polygon","coordinates":[[[113.5,34.2],[113.8,34.4],[114.2,34.5],[114.5,34.3],[114.6,34.0],[114.4,33.8],[114.0,33.7],[113.6,33.8],[113.4,34.0],[113.5,34.2]]]}},
-      {"type":"Feature","properties":{"adcode":410200,"name":"开封市"},"geometry":{"type":"Polygon","coordinates":[[[114.4,34.8],[114.7,35.0],[115.0,34.9],[115.2,34.6],[115.0,34.3],[114.6,34.3],[114.4,34.5],[114.4,34.8]]]}},
-      {"type":"Feature","properties":{"adcode":410300,"name":"洛阳市"},"geometry":{"type":"Polygon","coordinates":[[[111.0,34.0],[111.5,34.5],[112.0,34.8],[112.5,35.0],[113.0,34.8],[113.5,34.5],[113.5,34.2],[113.4,34.0],[113.0,33.8],[112.5,33.7],[112.0,33.8],[111.5,33.9],[111.0,34.0]]]}},
-      {"type":"Feature","properties":{"adcode":410400,"name":"平顶山市"},"geometry":{"type":"Polygon","coordinates":[[[112.5,33.5],[113.0,33.8],[113.5,33.9],[113.8,33.7],[113.7,33.4],[113.3,33.2],[112.8,33.3],[112.5,33.5]]]}},
-      {"type":"Feature","properties":{"adcode":410500,"name":"安阳市"},"geometry":{"type":"Polygon","coordinates":[[[113.8,35.8],[114.2,36.0],[114.6,35.9],[114.8,35.6],[114.6,35.3],[114.2,35.2],[113.9,35.4],[113.8,35.8]]]}},
-      {"type":"Feature","properties":{"adcode":410600,"name":"鹤壁市"},"geometry":{"type":"Polygon","coordinates":[[[113.9,35.7],[114.0,35.9],[114.3,35.9],[114.4,35.7],[114.2,35.5],[113.9,35.7]]]}},
-      {"type":"Feature","properties":{"adcode":410700,"name":"新乡市"},"geometry":{"type":"Polygon","coordinates":[[[113.5,35.0],[113.8,35.3],[114.2,35.5],[114.6,35.3],[114.7,35.0],[114.4,34.8],[114.0,34.7],[113.6,34.8],[113.5,35.0]]]}},
-      {"type":"Feature","properties":{"adcode":410800,"name":"焦作市"},"geometry":{"type":"Polygon","coordinates":[[[112.5,35.0],[113.0,35.2],[113.5,35.1],[113.6,34.8],[113.3,34.6],[112.8,34.7],[112.5,35.0]]]}},
-      {"type":"Feature","properties":{"adcode":410900,"name":"濮阳市"},"geometry":{"type":"Polygon","coordinates":[[[114.8,35.5],[115.2,35.7],[115.6,35.6],[115.7,35.3],[115.4,35.0],[115.0,35.1],[114.8,35.5]]]}},
-      {"type":"Feature","properties":{"adcode":411000,"name":"许昌市"},"geometry":{"type":"Polygon","coordinates":[[[113.4,34.0],[113.6,34.2],[114.0,34.3],[114.2,34.1],[114.1,33.8],[113.7,33.7],[113.4,34.0]]]}},
-      {"type":"Feature","properties":{"adcode":411100,"name":"漯河市"},"geometry":{"type":"Polygon","coordinates":[[[113.7,33.7],[114.0,33.8],[114.2,33.6],[114.0,33.4],[113.6,33.5],[113.7,33.7]]]}},
-      {"type":"Feature","properties":{"adcode":411200,"name":"三门峡市"},"geometry":{"type":"Polygon","coordinates":[[[110.3,34.0],[110.8,34.5],[111.3,34.7],[111.5,34.3],[111.2,33.9],[110.7,33.7],[110.3,34.0]]]}},
-      {"type":"Feature","properties":{"adcode":411300,"name":"南阳市"},"geometry":{"type":"Polygon","coordinates":[[[111.0,32.7],[111.8,33.2],[112.5,33.5],[113.2,33.4],[113.5,33.0],[113.3,32.5],[112.8,32.2],[112.0,32.3],[111.3,32.5],[111.0,32.7]]]}},
-      {"type":"Feature","properties":{"adcode":411400,"name":"商丘市"},"geometry":{"type":"Polygon","coordinates":[[[115.0,34.3],[115.4,34.6],[115.8,34.5],[116.2,34.2],[116.0,33.8],[115.5,33.7],[115.0,33.9],[115.0,34.3]]]}},
-      {"type":"Feature","properties":{"adcode":411500,"name":"信阳市"},"geometry":{"type":"Polygon","coordinates":[[[113.5,31.8],[114.0,32.2],[114.5,32.5],[115.2,32.4],[115.5,31.9],[115.2,31.4],[114.5,31.2],[113.8,31.4],[113.5,31.8]]]}},
-      {"type":"Feature","properties":{"adcode":411600,"name":"周口市"},"geometry":{"type":"Polygon","coordinates":[[[114.2,33.8],[114.6,34.1],[115.0,34.0],[115.2,33.6],[115.0,33.2],[114.5,33.1],[114.1,33.4],[114.2,33.8]]]}},
-      {"type":"Feature","properties":{"adcode":411700,"name":"驻马店市"},"geometry":{"type":"Polygon","coordinates":[[[113.5,32.8],[114.0,33.1],[114.5,33.2],[114.8,32.9],[114.6,32.5],[114.0,32.3],[113.5,32.5],[113.5,32.8]]]}},
-      {"type":"Feature","properties":{"adcode":419001,"name":"济源市"},"geometry":{"type":"Polygon","coordinates":[[[112.3,35.0],[112.5,35.2],[112.8,35.1],[112.7,34.8],[112.4,34.8],[112.3,35.0]]]}}
-    ]};
-
-    // 注册地图
-    echarts.registerMap('henan', henanGeoJSON);
-
-    // 地市坐标
-    const cityCoords = {
-      '郑州市': [113.65, 34.76],
-      '开封市': [114.35, 34.79],
-      '洛阳市': [112.45, 34.62],
-      '平顶山市': [113.29, 33.75],
-      '安阳市': [114.35, 36.10],
-      '鹤壁市': [114.30, 35.75],
-      '新乡市': [113.85, 35.30],
-      '焦作市': [113.25, 35.22],
-      '濮阳市': [115.03, 35.76],
-      '许昌市': [113.85, 34.03],
-      '漯河市': [114.02, 33.58],
-      '三门峡市': [111.20, 34.77],
-      '南阳市': [112.53, 33.00],
-      '商丘市': [115.65, 34.44],
-      '信阳市': [114.09, 32.15],
-      '周口市': [114.70, 33.62],
-      '驻马店市': [114.02, 33.01],
-      '济源市': [112.60, 35.07]
-    };
-
-    // 拓扑连线（郑州核心到各地市）
-    const topoLines = Object.keys(cityCoords).filter(c => c !== '郑州市').map(city => ({
-      coords: [cityCoords['郑州市'], cityCoords[city]]
-    }));
-
-    // 初始化地图
-    const mapChart = echarts.init(document.getElementById('map-chart'));
-    
-    const mapOption = {
-      backgroundColor: 'transparent',
-      tooltip: {
-        trigger: 'item',
-        backgroundColor: 'rgba(10,30,60,0.9)',
-        borderColor: '#4a9eff',
-        textStyle: { color: '#e0e8f0' },
-        formatter: function(params) {
-          if (params.seriesType === 'map') {
-            return `<strong>${params.name}</strong><br/>流量: ${Math.floor(Math.random() * 100 + 50)} Gbps<br/>设备: ${Math.floor(Math.random() * 50 + 20)} 台`;
-          }
-          return params.name;
-        }
-      },
-      geo: {
-        map: 'henan',
-        roam: true,
-        zoom: 1.2,
-        center: [113.5, 34.0],
-        label: {
-          show: true,
-          color: '#a0c4ff',
-          fontSize: 11
-        },
-        itemStyle: {
-          areaColor: '#1a3a5c',
-          borderColor: '#4a9eff',
-          borderWidth: 1.5,
-          shadowColor: 'rgba(74,158,255,0.3)',
-          shadowBlur: 10
-        },
-        emphasis: {
-          label: { color: '#fff', fontSize: 13 },
-          itemStyle: { areaColor: '#2563eb' }
-        },
-        select: {
-          label: { color: '#fff' },
-          itemStyle: { areaColor: '#1d4ed8' }
-        }
-      },
-      series: [
-        // 拓扑连线
-        {
-          type: 'lines',
-          coordinateSystem: 'geo',
-          zlevel: 2,
-          effect: {
-            show: true,
-            period: 4,
-            trailLength: 0.5,
-            symbol: 'arrow',
-            symbolSize: 6,
-            color: '#4ade80'
-          },
-          lineStyle: {
-            color: '#4a9eff',
-            width: 1.5,
-            curveness: 0.2,
-            opacity: 0.6
-          },
-          data: topoLines
-        },
-        // 地市节点
-        {
-          type: 'scatter',
-          coordinateSystem: 'geo',
-          zlevel: 3,
-          symbol: 'circle',
-          symbolSize: 12,
-          itemStyle: {
-            color: '#4a9eff',
-            borderColor: '#fff',
-            borderWidth: 2,
-            shadowColor: 'rgba(74,158,255,0.8)',
-            shadowBlur: 10
-          },
-          label: {
-            show: true,
-            formatter: '{b}',
-            position: 'right',
-            color: '#a0c4ff',
-            fontSize: 10
-          },
-          data: Object.entries(cityCoords).map(([name, coord]) => ({
-            name: name.replace('市', ''),
-            value: coord
-          }))
-        },
-        // 郑州核心节点
-        {
-          type: 'effectScatter',
-          coordinateSystem: 'geo',
-          zlevel: 4,
-          symbol: 'circle',
-          symbolSize: 20,
-          rippleEffect: {
-            brushType: 'stroke',
-            scale: 4,
-            period: 3
-          },
-          itemStyle: {
-            color: '#ef4444',
-            borderColor: '#fff',
-            borderWidth: 3,
-            shadowColor: 'rgba(239,68,68,0.8)',
-            shadowBlur: 15
-          },
-          label: {
-            show: true,
-            formatter: '郑州核心\n156.8G',
-            position: 'top',
-            color: '#fff',
-            fontSize: 12,
-            fontWeight: 'bold',
-            align: 'center'
-          },
-          data: [{
-            name: '郑州核心',
-            value: cityCoords['郑州市']
-          }]
-        }
-      ]
-    };
-
-    mapChart.setOption(mapOption);
-
-    // 健康度环形图
-    function drawHealthRing() {
-      const canvas = document.getElementById('health-ring');
-      const ctx = canvas.getContext('2d');
-      canvas.width = 240;
-      canvas.height = 240;
-      
-      const centerX = 120, centerY = 120, radius = 90, lineWidth = 12;
-      const healthPercent = 0.968;
-      
-      // 背景环
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-      ctx.strokeStyle = 'rgba(74,158,255,0.2)';
-      ctx.lineWidth = lineWidth;
-      ctx.stroke();
-      
-      // 健康度环
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * healthPercent);
-      const gradient = ctx.createLinearGradient(0, 0, 240, 240);
-      gradient.addColorStop(0, '#4ade80');
-      gradient.addColorStop(1, '#22c55e');
-      ctx.strokeStyle = gradient;
-      ctx.lineWidth = lineWidth;
-      ctx.stroke();
-    }
-
-    // 流量折线图
-    function drawTrafficLine() {
-      const canvas = document.getElementById('traffic-line');
-      const ctx = canvas.getContext('2d');
-      canvas.width = 280;
-      canvas.height = 120;
-      
-      const data = [45,52,48,55,62,58,65,72,78,85,92,88,95,102,98,105,112,108,115,120,118,125,130,128];
-      const max = Math.max(...data);
-      const stepX = canvas.width / (data.length - 1);
-      
-      // 绘制折线
-      ctx.beginPath();
-      ctx.moveTo(0, canvas.height - (data[0] / max) * canvas.height);
-      data.forEach((v, i) => {
-        ctx.lineTo(i * stepX, canvas.height - (v / max) * canvas.height);
-      });
-      ctx.strokeStyle = '#4a9eff';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      
-      // 渐变填充
-      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      gradient.addColorStop(0, 'rgba(74,158,255,0.3)');
-      gradient.addColorStop(1, 'rgba(74,158,255,0)');
-      ctx.lineTo(canvas.width, canvas.height);
-      ctx.lineTo(0, canvas.height);
-      ctx.fillStyle = gradient;
-      ctx.fill();
-    }
-
-    // 系统负载环形图
-    function drawLoadRing() {
-      const canvas = document.getElementById('load-ring');
-      const ctx = canvas.getContext('2d');
-      canvas.width = 200;
-      canvas.height = 200;
-      
-      const centerX = 100, centerY = 100, radius = 70, lineWidth = 10;
-      const loadPercent = 0.67;
-      
-      // 背景环
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-      ctx.strokeStyle = 'rgba(74,158,255,0.2)';
-      ctx.lineWidth = lineWidth;
-      ctx.stroke();
-      
-      // 负载环
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * loadPercent);
-      ctx.strokeStyle = '#4a9eff';
-      ctx.lineWidth = lineWidth;
-      ctx.stroke();
-    }
-
     // 更新时间
     function updateTime() {
       const now = new Date();
-      document.getElementById('current-time').textContent = now.toLocaleString('zh-CN', {
-        year: 'numeric', month: '2-digit', day: '2-digit',
-        hour: '2-digit', minute: '2-digit', second: '2-digit'
-      }).replace(/\//g, '-');
+      document.getElementById('current-time').textContent = now.toLocaleString('zh-CN', {hour12:false});
     }
-
-    // 初始化
-    drawHealthRing();
-    drawTrafficLine();
-    drawLoadRing();
     updateTime();
     setInterval(updateTime, 1000);
-
-    // 窗口大小调整
-    window.addEventListener('resize', () => mapChart.resize());
+    
+    // 地市坐标数据
+    const cityCoords = {
+      '郑州市': [113.665, 34.758],
+      '开封市': [114.341, 34.797],
+      '洛阳市': [112.434, 34.663],
+      '平顶山市': [113.308, 33.735],
+      '安阳市': [114.352, 36.103],
+      '鹤壁市': [114.295, 35.748],
+      '新乡市': [113.884, 35.303],
+      '焦作市': [113.238, 35.239],
+      '濮阳市': [115.041, 35.768],
+      '许昌市': [113.826, 34.023],
+      '漯河市': [114.026, 33.576],
+      '三门峡市': [111.194, 34.777],
+      '南阳市': [112.541, 32.999],
+      '商丘市': [115.650, 34.437],
+      '信阳市': [114.075, 32.123],
+      '周口市': [114.650, 33.620],
+      '驻马店市': [114.025, 32.980],
+      '济源市': [112.590, 35.090]
+    };
+    
+    // 拓扑连线（从郑州到各地市）
+    const topoLines = Object.keys(cityCoords).filter(name => name !== '郑州市').map(name => ({
+      coords: [cityCoords['郑州市'], cityCoords[name]]
+    }));
+    
+    // 地市节点数据
+    const cityNodes = Object.keys(cityCoords).map(name => ({
+      name: name.replace('市', ''),
+      value: [...cityCoords[name], Math.floor(Math.random() * 50 + 10)]
+    }));
+    
+    // 初始化地图
+    const mapChart = echarts.init(document.getElementById('map-chart'));
+    
+    // 加载GeoJSON并注册地图
+    fetch('/tmp/henan-compressed.json')
+      .then(res => res.json())
+      .then(geoJson => {
+        echarts.registerMap('henan', geoJson);
+        
+        const option = {
+          backgroundColor: 'transparent',
+          tooltip: {
+            trigger: 'item',
+            backgroundColor: 'rgba(10,30,60,0.9)',
+            borderColor: '#4a9eff',
+            textStyle: { color: '#e0e8f0' }
+          },
+          geo: {
+            map: 'henan',
+            roam: true,
+            zoom: 1.1,
+            center: [113.5, 34.2],
+            label: {
+              show: true,
+              color: '#8ab4f8',
+              fontSize: 10
+            },
+            itemStyle: {
+              areaColor: '#1a3a5c',
+              borderColor: '#4a9eff',
+              borderWidth: 1,
+              shadowColor: 'rgba(74,158,255,0.3)',
+              shadowBlur: 10
+            },
+            emphasis: {
+              itemStyle: {
+                areaColor: '#2a5a8c',
+                borderColor: '#4ade80',
+                borderWidth: 2
+              },
+              label: {
+                color: '#4ade80',
+                fontSize: 12,
+                fontWeight: 'bold'
+              }
+            }
+          },
+          series: [
+            // 拓扑连线
+            {
+              type: 'lines',
+              coordinateSystem: 'geo',
+              zlevel: 2,
+              effect: {
+                show: true,
+                period: 4,
+                trailLength: 0.2,
+                symbol: 'arrow',
+                symbolSize: 5,
+                color: '#4ade80'
+              },
+              lineStyle: {
+                color: '#4a9eff',
+                width: 1.5,
+                curveness: 0.2,
+                opacity: 0.6
+              },
+              data: topoLines
+            },
+            // 地市节点
+            {
+              type: 'scatter',
+              coordinateSystem: 'geo',
+              zlevel: 3,
+              symbol: 'circle',
+              symbolSize: function(val) {
+                return Math.max(8, val[2] / 3);
+              },
+              itemStyle: {
+                color: function(params) {
+                  return params.name === '郑州' ? '#f87171' : '#4a9eff';
+                },
+                shadowColor: 'rgba(74,158,255,0.5)',
+                shadowBlur: 10
+              },
+              label: {
+                show: true,
+                formatter: '{b}',
+                position: 'right',
+                color: '#e0e8f0',
+                fontSize: 11
+              },
+              emphasis: {
+                itemStyle: {
+                  color: '#4ade80',
+                  borderColor: '#fff',
+                  borderWidth: 2
+                }
+              },
+              data: cityNodes
+            },
+            // 郑州核心节点（脉动效果）
+            {
+              type: 'effectScatter',
+              coordinateSystem: 'geo',
+              zlevel: 4,
+              symbol: 'circle',
+              symbolSize: 18,
+              rippleEffect: {
+                brushType: 'stroke',
+                scale: 3,
+                period: 2
+              },
+              itemStyle: {
+                color: '#f87171',
+                shadowColor: 'rgba(248,113,113,0.5)',
+                shadowBlur: 20
+              },
+              label: {
+                show: true,
+                formatter: '郑州核心',
+                position: 'top',
+                color: '#f87171',
+                fontSize: 12,
+                fontWeight: 'bold'
+              },
+              data: [{ name: '郑州核心', value: cityCoords['郑州市'] }]
+            }
+          ]
+        };
+        
+        mapChart.setOption(option);
+      })
+      .catch(err => {
+        console.error('加载地图数据失败:', err);
+        document.getElementById('map-chart').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#f87171">地图加载失败，请刷新页面</div>';
+      });
+    
+    // 健康度环形图
+    const healthChart = echarts.init(document.getElementById('health-chart'));
+    healthChart.setOption({
+      series: [{
+        type: 'gauge',
+        startAngle: 200,
+        endAngle: -20,
+        min: 0,
+        max: 100,
+        splitNumber: 10,
+        radius: '100%',
+        center: ['50%', '60%'],
+        axisLine: {
+          lineStyle: {
+            width: 12,
+            color: [[0.8, '#4ade80'], [0.9, '#fbbf24'], [1, '#f87171']]
+          }
+        },
+        pointer: { show: false },
+        axisTick: { show: false },
+        splitLine: { show: false },
+        axisLabel: { show: false },
+        detail: {
+          valueAnimation: true,
+          formatter: '{value}',
+          fontSize: 28,
+          fontWeight: 'bold',
+          color: '#4ade80',
+          offsetCenter: [0, '10%']
+        },
+        data: [{ value: 92 }]
+      }]
+    });
+    
+    // 流量趋势图
+    const trafficChart = echarts.init(document.getElementById('traffic-chart'));
+    const hours = Array.from({length: 24}, (_, i) => `${i}:00`);
+    const trafficData = [12, 15, 18, 22, 28, 35, 42, 48, 52, 55, 58, 62, 65, 63, 60, 55, 52, 48, 45, 40, 35, 28, 22, 18];
+    
+    trafficChart.setOption({
+      grid: { top: 10, right: 10, bottom: 20, left: 30 },
+      xAxis: {
+        type: 'category',
+        data: hours,
+        axisLine: { lineStyle: { color: '#4a9eff' } },
+        axisLabel: { color: '#8ab4f8', fontSize: 9, interval: 3 },
+        axisTick: { show: false }
+      },
+      yAxis: {
+        type: 'value',
+        axisLine: { show: false },
+        axisLabel: { color: '#8ab4f8', fontSize: 9 },
+        splitLine: { lineStyle: { color: 'rgba(64,158,255,0.2)' } }
+      },
+      series: [{
+        type: 'line',
+        data: trafficData,
+        smooth: true,
+        symbol: 'none',
+        lineStyle: { color: '#4a9eff', width: 2 },
+        areaStyle: {
+          color: {
+            type: 'linear',
+            x: 0, y: 0, x2: 0, y2: 1,
+            colorStops: [
+              { offset: 0, color: 'rgba(74,158,255,0.4)' },
+              { offset: 1, color: 'rgba(74,158,255,0.05)' }
+            ]
+          }
+        }
+      }]
+    });
+    
+    // 系统负载图
+    const loadChart = echarts.init(document.getElementById('load-chart'));
+    loadChart.setOption({
+      series: [{
+        type: 'gauge',
+        startAngle: 200,
+        endAngle: -20,
+        min: 0,
+        max: 100,
+        radius: '100%',
+        center: ['50%', '60%'],
+        axisLine: {
+          lineStyle: {
+            width: 10,
+            color: [[0.6, '#4ade80'], [0.8, '#fbbf24'], [1, '#f87171']]
+          }
+        },
+        pointer: { show: false },
+        axisTick: { show: false },
+        splitLine: { show: false },
+        axisLabel: { show: false },
+        detail: {
+          valueAnimation: true,
+          formatter: '{value}%',
+          fontSize: 20,
+          fontWeight: 'bold',
+          color: '#4a9eff',
+          offsetCenter: [0, '10%']
+        },
+        data: [{ value: 45 }]
+      }]
+    });
+    
+    // 窗口resize
+    window.addEventListener('resize', () => {
+      mapChart.resize();
+      healthChart.resize();
+      trafficChart.resize();
+      loadChart.resize();
+    });
+    
+    // 模拟数据更新
+    setInterval(() => {
+      healthChart.setOption({
+        series: [{ data: [{ value: Math.floor(Math.random() * 10 + 88) }] }]
+      });
+      loadChart.setOption({
+        series: [{ data: [{ value: Math.floor(Math.random() * 30 + 35) }] }]
+      });
+    }, 5000);
   </script>
 </body>
 </html>
