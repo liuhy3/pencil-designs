@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>河南省网络拓扑可视化大屏</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:"Microsoft YaHei",sans-serif;background:linear-gradient(135deg,#0a1628 0%,#1a2a4a 50%,#0d1f3c 100%);color:#e0e8f0;overflow:hidden}
@@ -19,13 +20,7 @@
     .left-panel{grid-row:2;grid-column:1}
     .right-panel{grid-row:2;grid-column:3}
     .center-area{grid-row:2;grid-column:2;position:relative;background:rgba(10,30,60,0.4);border:1px solid rgba(64,158,255,0.3);border-radius:4px;overflow:hidden}
-    #map-container{width:100%;height:100%;position:relative}
-    #map-svg svg{width:100%;height:100%}
-    #map-svg path{fill:rgba(74,158,255,0.25)!important;stroke:rgba(100,180,255,0.6)!important;stroke-width:1!important}
-    .city-node{position:absolute;border-radius:50%;background:#60a5fa;box-shadow:0 0 8px rgba(74,158,255,0.6);pointer-events:none}
-    .city-node.center{background:#4a9eff;box-shadow:0 0 12px rgba(74,158,255,0.8)}
-    .city-label{position:absolute;font-size:11px;color:#fff;text-shadow:0 0 4px rgba(0,0,0,0.8);pointer-events:none;white-space:nowrap}
-    .pb-node{position:absolute;width:5px;height:5px;border-radius:50%;background:#4ade80;pointer-events:none}
+    #map-chart{width:100%;height:100%}
     .module{margin-bottom:16px}
     .module-title{font-size:13px;color:#8ab4f8;margin-bottom:10px;display:flex;align-items:center;gap:6px}
     .module-title::before{content:'';width:3px;height:12px;background:#4a9eff;border-radius:2px}
@@ -75,7 +70,7 @@
   <div class="header">
     <h1>河南省网络拓扑可视化大屏</h1>
     <div class="header-info">
-      <span class="time" id="current-time">2026-03-25 14:00:00</span>
+      <span class="time" id="current-time">2026-03-25 14:30:00</span>
       <span class="status">● 正常</span>
       <span class="user">admin</span>
     </div>
@@ -120,10 +115,7 @@
   </div>
 
   <div class="center-area">
-    <div id="map-container">
-      <div id="map-svg"></div>
-      <svg id="topo-svg" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;"></svg>
-    </div>
+    <div id="map-chart"></div>
     <div class="legend">
       <div class="legend-item"><div class="legend-color basic"></div><span>基础网络</span></div>
       <div class="legend-item"><div class="legend-color business"></div><span>业务流量</span></div>
@@ -161,94 +153,109 @@
 function updateTime(){document.getElementById('current-time').textContent=new Date().toLocaleString('zh-CN',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).replace(/\//g,'-')}
 setInterval(updateTime,1000);updateTime();
 
-// 河南省地图SVG
-const henanSvg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="-166 -118 809.5 773"><path fill="rgba(74,158,255,0.3)" stroke="rgba(100,180,255,0.5)" stroke-width="1" d="m-83 323-1 4 3 6v7l-3 2 4 15-4 2 1 3-3 6 2 2h-2l4 3v2l5 3-2 6 1 1 3-4h2l5 4 3 5 4 1 2 7-6 3v2h12v3l4 5-4 9 1 6 1 1 3-3 2 7 11 4 5 12h4l2-2-1-1 2 2-2 5-2-2v2l-2-1 2 2h3v2l6 5 2 3v4l4 4 2 1 8-6 1 4h9l12 11 6 1 2 4 10-2 6 8-1 1 3 1 4-3h3v4l3 2v2l9 6 1-1h-2v-3l2-1 2 3-1 1h7l13 10v-3l4-4h4l8 4-1-2 2-2 8-3 1 1 2-4 5 4 3-1 5 3 9 2 2-2v2l3 2 6-5 9-4 1 3 4-2 10 3 1-7 4-1 7 5 3-1 2 4h4l1-6 7-3 3 4 5 3 3 5 3 1 1 2-2 1 4 4h4l6 5 13-9h2l1 4 2-1v-5h2v-2h3v-2h3l3-7 9-1 4 5-1 3 4 1-3 3v2l3 3-4 10 1 4 2 2 2-1v3l-4 11-1 1-1-2h-2l1 6 8 7-1 3h-2l-1 5 7 3-1 5 4 2v10l5 2 3-1 2-5h2l3 4v9l2 1 3 6 3-3 6-1 1-2 2 1 6-7-1-1 5-1 1-2h3l4 3 2-1-1 1 8 12h7l3 2 4-1 6 3 3-2h5v-4l2 4 3-2v-2h4l1 10-2 2v4l-3 3 1 12 2 1 3-3 6-1 4 6 3-1v4l8-1 3 7 4 1 2 3 3-3 4 1 5-2 2 2 3-4h2l3 4v-5l3-4 2 2 7 1 2-3-1-4 3-4v-3h5l2 1v3l7 3-3 10v7l1 3h4v5l6-1 1 2 4-3h5l2-7-2-3v-4l5-4 3-9 7-6-2-4 7-8 3 1 6-6 8-4 2-3 8 3-1-2 5-2 5 2 1 2 4-4 1 2h4l4-6-3-3v-7l3-6-1-6 2-6 1 1-1-9 2-4-2-4 2-10-4-9 1-6-3-16 1-3-3-6v-4h-2l3-5-5-3 8-9h2l-4-1-7 8v3h-2l-5 5v-3l-2-2-1 3-3 1-5-3v4l-3 1 1 2-2 6-2 1 1-3-4 3-3-3-6 3 1-1-7-6-1-5-9-7 1-2-4-1v-4l-3 2-11 1-1-1 2-1-2-1v-2l-4 2-1-3h-2l-2 3v-2l-4-2 2-2-2-4 1-1 1 2 1-4-2 1-1-4-2 2v-17l1-2 2 1-2-4v-4l2-1-1-2-5-1-2-5-14-2v-3l-3-2-8 1-1-3-7-4 2-3-1-3 3 1 3-2-2-1-1-8h-2v-7l4-3 4 1 4 4v2l6 3h15l5-6 2 2 5-4 5 1 1-11 4-1v-6l2-2-1-6h3l1-6h-2l-2-4 1-1-4-1 2-4-2-4 2-3h2v-8l3-3 4 2 3-8 10-1 2 2 2-2 4 1 1-3 9-1-5-11-1-12-4-6 3-2 4 2v-7l3-4-1-4h-9l-2-1v-2l3-3-1-3 2-7 2-1v-5h2l-1-2 6-1 1-5 2 1 9-3 4 2 1-2 9 7 1 4h3v-4h2l4 4h4l4 3 2 3-3 8 1 2 9 6 1 6-3-1 2 1 2 7 3-1v2l5 3 3 7h2l3-3 4 1v-2l4 1 7-7 2 1 2-2 6-1 2-3h4v-6l3-3 8-1v-2h4v-3l2-1 7 3 2-1 1-12-5-4-5-13-4-3-1-3 1-5 3-3-3-7 6-8-10-4-5 4h-2v-3l-5 3h-5l-2-1 2-3-2-4-8-3-1-3h-2l-1-2-7-2-1-5-6-7 6-7-2-5 1-6-7 4-5-9-9 2-4-4-2 1v4l-2 1-16 3-1-1-2 2-8-5h-5l-2-2-1 5-2 2-8-3-8 1-6-2-7-9v-3l-2-2-1-10 2-1-3-10h-2l-2-4-10-4-8 2-2-1 1-9-6-1 2-7h-8l-4-7h-7l-6 5-2-3h-7l-4 3-2-3-4-2 1-3h-2l-1 3-4-1 3-3v-2h-3l-1-2 1-3 4-1 3-3v-2l-6-6 2-4 3-2 7-1v-9l6-2-2-2 7-7 3-9h5l2-6 1 2h2v-2 3l2-4h13l9-9 7-2-2-9 2-1V9l1 1 1-2 1 1V7l1 1 3-5V0l9-14 6-3h7l14-4v-5h2v-3l1 1 1-3 1 1v-3h3l2-3 6 1 6-2v-2l1 2 2-6-2-4 5-1v-5l10-2 7 1 3-10 2-2-1-3 2-2 1-6-5 1-5 7-11 4-1 2-4-1-5 4-5-2-3 1-4 6-8 1-7 7-5-1-8 5-11 4-7 10-5 4-4-2 2-10-2-1 3-1 1-4v-4l-2-3 2-5 10-6v-7l2-2-1-1 4-9-2-7h-2v4l-6 1v-2l-2 4h-2l-1 4-6 3-3-3 1-4-3-2-5-8-5-3-4 3-6-3-3 6-4-1-3 3v8l-6 6h-4l-6 4v-9l-2-3 1-3-6-1-2 3-2-1-2 2-6-2-2 1-3-4-2 2h-9l-3 3h-6l1-3h-2l-5-5h-4l-7-5h-4l-1-3-6-1-2-3h-6l-6-3-2 2-2-3h-2l-1 4-3 1v-4l-2-1-13-1-2-3v-2l2-1-1-2h-3v-4h-2l-1 2-3-3v3l2 2-1 2-3-6-2-1v4h-2l-3 3-4-6-4 1v3h-4l-3-3h-3l1-2-2 1-1-2h-2l-2 4 1 3-3 4 1 6-6 8 3-1v5l-6 2 7 4-1 4h-5l3 4 1 7-3 1-1 2 5 1v2h-2l2 2-1 3-5-2-2 1 3 9-3 10 3 3v2l-2 3-2-2-6 2 3 3-3 1 3 3-2 8 2 3-1 2 4 4v6h-6l-3-5-1 1 1 6-6 8v7l-9 2-3-1-9 8h-3l-1-2-3 1 4 2h-2l-1 2 1 3-10-4-5 1v5l-3 1v4l-2 1v4l-2 1v2l-18-5v3l-2 1 1 8-3-1-4 2-1 4-3 2-10-2-8 8h-6l-1 3v-5l-5-2-2-4-2 2-1-3-2 2 3 4h-5l-4 2-4-2-3 1-3-2-4 1-8-3-4 4H82l2-5-8 3-3-1v-2l-11-3-2 1-8-3 3 6v4l-5 3 3 7-1 18-5-4h-6l-1-2h-8l-2 2-3-2-6 2-1 5-5 3h-3l-1 2-9 2 2 6-5 2-4 7-3 2-1 5h-7l-6 4-6-2-5 4-6-3-7 4-4-2-5 5-7-4-3 1-4 8-11 2-7 6h-2l-1-3-4-1-2 9-9 9h-2l-4-6h-4l-7 8-12-1-8 4-8-4-8 3-6-2-2 5 5 1-4 3v8l3 4 1 5 4 4h4l5 10-1 4h-3l-5 5-1 2 2 5 14 5 1 3h4v2h4l3 3-4 7-3 2v12h3l1-2 4 7v3l3 1v3l-6 3v3l-5 1 3 8h7l6 3 2 4 5 2 2-1 6 13-1 5 7 7 12 4 4 5z"/></svg>`;
+// 地市坐标数据（用于拓扑连线）
+const cityCoords = {
+  '郑州市': [113.665412, 34.757975],
+  '开封市': [114.307581, 34.797239],
+  '洛阳市': [112.454026, 34.619685],
+  '平顶山市': [113.192661, 33.766168],
+  '安阳市': [114.392943, 36.097767],
+  '鹤壁市': [114.297267, 35.747234],
+  '新乡市': [113.92688, 35.302655],
+  '焦作市': [113.238299, 35.215903],
+  '濮阳市': [115.029215, 35.762341],
+  '许昌市': [113.852392, 34.035744],
+  '漯河市': [114.046061, 33.576859],
+  '三门峡市': [111.200135, 34.773386],
+  '南阳市': [112.528321, 32.990952],
+  '商丘市': [115.656037, 34.414172],
+  '信阳市': [114.091934, 32.147023],
+  '周口市': [114.696851, 33.625627],
+  '驻马店市': [114.022294, 32.980032],
+  '济源市': [112.602421, 35.067229]
+};
 
-// 地市坐标
-const cities=[
-  {name:'郑州',x:0.50,y:0.43,center:true},{name:'开封',x:0.62,y:0.40},{name:'洛阳',x:0.35,y:0.43},
-  {name:'平顶山',x:0.42,y:0.56},{name:'安阳',x:0.52,y:0.13},{name:'鹤壁',x:0.56,y:0.18},
-  {name:'新乡',x:0.48,y:0.26},{name:'焦作',x:0.40,y:0.28},{name:'濮阳',x:0.72,y:0.20},
-  {name:'许昌',x:0.50,y:0.53},{name:'漯河',x:0.50,y:0.60},{name:'三门峡',x:0.18,y:0.40},
-  {name:'南阳',x:0.30,y:0.73},{name:'商丘',x:0.75,y:0.40},{name:'信阳',x:0.48,y:0.83},
-  {name:'周口',x:0.62,y:0.60},{name:'驻马店',x:0.50,y:0.70}
-];
-
-let frame=0,nodes=[];
-
+// 初始化地图
+let mapChart;
 function initMap(){
-  const container=document.getElementById('map-container');
-  const mapDiv=document.getElementById('map-svg');
-  mapDiv.innerHTML=henanSvg;
+  mapChart = echarts.init(document.getElementById('map-chart'));
   
-  const w=container.offsetWidth,h=container.offsetHeight,pad=50;
-  const zz=cities.find(c=>c.center);
-  const zx=pad+zz.x*(w-2*pad),zy=pad+zz.y*(h-2*pad);
+  // 显示加载提示
+  mapChart.showLoading({text:'正在加载地图数据...',color:'#4a9eff',maskColor:'rgba(10,30,60,0.8)'});
   
-  const topoSvg=document.getElementById('topo-svg');
-  topoSvg.innerHTML='';
-  frame++;
-
-  // 绘制拓扑连线
-  cities.forEach(city=>{
-    if(!city.center){
-      const cx=pad+city.x*(w-2*pad),cy=pad+city.y*(h-2*pad);
-      const colors=['#4a9eff','#4ade80','#fb923c'];
-      const color=colors[Math.abs(city.name.charCodeAt(0))%3];
+  // 加载河南省 GeoJSON
+  fetch('https://geo.datav.aliyun.com/areas_v3/bound/410000_full.json')
+    .then(res => res.json())
+    .then(geoJson => {
+      mapChart.hideLoading();
       
-      const line=document.createElementNS('http://www.w3.org/2000/svg','line');
-      line.setAttribute('x1',zx);line.setAttribute('y1',zy);
-      line.setAttribute('x2',cx);line.setAttribute('y2',cy);
-      line.setAttribute('stroke',color);
-      line.setAttribute('stroke-width','1.5');
-      line.setAttribute('stroke-dasharray','5,5');
-      line.setAttribute('stroke-dashoffset',String(-frame));
-      topoSvg.appendChild(line);
-    }
-  });
-
-  // 清除旧节点
-  nodes.forEach(n=>n.remove());
-  nodes=[];
-
-  // 绘制城市节点
-  cities.forEach(city=>{
-    const cx=pad+city.x*(w-2*pad),cy=pad+city.y*(h-2*pad);
-    
-    const node=document.createElement('div');
-    node.className='city-node'+(city.center?' center':'');
-    node.style.width=city.center?'18px':'12px';
-    node.style.height=city.center?'18px':'12px';
-    node.style.left=(cx-(city.center?9:6))+'px';
-    node.style.top=(cy-(city.center?9:6))+'px';
-    container.appendChild(node);
-    nodes.push(node);
-    
-    const label=document.createElement('div');
-    label.className='city-label';
-    label.textContent=city.name;
-    label.style.left=(cx-city.name.length*5.5)+'px';
-    label.style.top=(cy+(city.center?20:14))+'px';
-    container.appendChild(label);
-    nodes.push(label);
-    
-    // 郑州核心节点PB
-    if(city.center){
-      for(let i=0;i<4;i++){
-        const angle=Math.PI/4+i*Math.PI/2;
-        const pb=document.createElement('div');
-        pb.className='pb-node';
-        pb.style.left=(zx+Math.cos(angle)*22-2.5)+'px';
-        pb.style.top=(zy+Math.sin(angle)*22-2.5)+'px';
-        container.appendChild(pb);
-        nodes.push(pb);
-      }
-    }
-  });
-  
-  requestAnimationFrame(initMap);
+      echarts.registerMap('henan', geoJson);
+      
+      // 准备拓扑连线数据（从郑州到各地市）
+      const lines = [];
+      const zzCoord = cityCoords['郑州市'];
+      Object.keys(cityCoords).forEach(city => {
+        if(city !== '郑州市'){
+          lines.push({
+            coords: [zzCoord, cityCoords[city]],
+            lineStyle: { color: ['#4a9eff','#4ade80','#fb923c'][Math.floor(Math.random()*3], width: 1.5, opacity: 0.6, curveness: 0.2 }
+          });
+        }
+      });
+      
+      // 准备地市节点数据
+      const data = Object.keys(cityCoords).map(city => ({
+        name: city.replace('市',''),
+        value: [...cityCoords[city], Math.random()*100+50]
+      }));
+      
+      const option = {
+        backgroundColor: 'transparent',
+        geo: { map: 'henan', roam: true, zoom: 1.2, center: [113.5, 34],
+          itemStyle: { areaColor: 'rgba(74,158,255,0.15)', borderColor: 'rgba(100,180,255,0.4)', borderWidth: 1 },
+          emphasis: { itemStyle: { areaColor: 'rgba(74,158,255,0.3)' } },
+          select: { itemStyle: { areaColor: 'rgba(74,158,255,0.35)' } }
+        },
+        series: [
+          // 地图
+          { type: 'map', map: 'henan', geoIndex: 0, data: data,
+            label: { show: true, color: '#fff', fontSize: 10, formatter: '{b}' },
+            itemStyle: { areaColor: 'rgba(74,158,255,0.2)', borderColor: 'rgba(100,180,255,0.5)', borderWidth: 0.5 },
+            emphasis: { itemStyle: { areaColor: 'rgba(74,158,255,0.4)' }, label: { show: true, fontSize: 11 } }
+          },
+          // 散点（地市节点）
+          { type: 'scatter', coordinateSystem: 'geo', data: data,
+            symbolSize: 12, itemStyle: { color: '#4a9eff', shadowBlur: 10, shadowColor: 'rgba(74,158,255,0.5)' },
+            label: { show: true, formatter: '{b}', position: 'right', color: '#fff', fontSize: 10 }
+          },
+          // 郑州核心节点（大一点）
+          { type: 'scatter', coordinateSystem: 'geo',
+            data: [{ name: '郑州', value: [...cityCoords['郑州市'], 100] }],
+            symbolSize: 20, itemStyle: { color: '#4a9eff', shadowBlur: 15, shadowColor: 'rgba(74,158,255,0.8)' },
+            label: { show: true, formatter: '郑州核心', position: 'top', color: '#4ade80', fontSize: 12, fontWeight: 'bold' }
+          },
+          // 拓扑连线
+          { type: 'lines', coordinateSystem: 'geo',
+            data: lines,
+            effect: { show: true, period: 4, trailLength: 0.2, symbol: 'arrow', symbolSize: 3, color: '#4ade80', loop: true },
+            lineStyle: { color: params => params.lineStyle.color, width: params => params.lineStyle.width, opacity: params => params.lineStyle.opacity, curveness: params => params.lineStyle.curveness }
+          }
+        ]
+      };
+      
+      mapChart.setOption(option);
+      
+      // 窗口大小变化时重新调整
+      window.addEventListener('resize', () => mapChart.resize());
+    })
+    .catch(err => {
+      mapChart.hideLoading();
+      console.error('地图加载失败:', err);
+      document.getElementById('map-chart').innerHTML = '<div style="color:#f87171;text-align:center;padding-top:200px;">地图加载失败，请刷新页面重试</div>';
+    });
 }
 
+// 绘制环形图
 function drawRing(id,pct,c1,c2){
   const canvas=document.getElementById(id);
   if(!canvas)return;
@@ -261,50 +268,35 @@ function drawRing(id,pct,c1,c2){
   ctx.strokeStyle=g;ctx.lineWidth=10;ctx.lineCap='round';ctx.stroke();
 }
 
+// 绘制折线图
 function drawLineChart(){
   const canvas=document.getElementById('traffic-chart');
   if(!canvas)return;
   const ctx=canvas.getContext('2d');
-  canvas.width=canvas.offsetWidth*2;
-  canvas.height=canvas.offsetHeight*2;
+  canvas.width=canvas.offsetWidth*2;canvas.height=canvas.offsetHeight*2;
   ctx.scale(2,2);
   const w=canvas.offsetWidth,h=canvas.offsetHeight,pad=10;
   const data=Array.from({length:24},(_,i)=>3+Math.random()*5+Math.sin(i/3)*2);
   const max=Math.max(...data);
-  
-  // 填充渐变
-  ctx.beginPath();
-  ctx.moveTo(pad,h-pad);
+  ctx.beginPath();ctx.moveTo(pad,h-pad);
   data.forEach((v,i)=>{const x=pad+i*(w-2*pad)/23,y=h-pad-(v/max)*(h-2*pad);ctx.lineTo(x,y);});
-  ctx.lineTo(pad+23*(w-2*pad)/23,h-pad);
-  ctx.closePath();
-  const g=ctx.createLinearGradient(0,0,0,h);
-  g.addColorStop(0,'rgba(74,158,255,0.3)');
-  g.addColorStop(1,'rgba(74,158,255,0)');
+  ctx.lineTo(pad+23*(w-2*pad)/23,h-pad);ctx.closePath();
+  const g=ctx.createLinearGradient(0,0,0,h);g.addColorStop(0,'rgba(74,158,255,0.3)');g.addColorStop(1,'rgba(74,158,255,0)');
   ctx.fillStyle=g;ctx.fill();
-  
-  // 线条
-  ctx.beginPath();
-  ctx.strokeStyle='#4a9eff';ctx.lineWidth=2;
+  ctx.beginPath();ctx.strokeStyle='#4a9eff';ctx.lineWidth=2;
   data.forEach((v,i)=>{const x=pad+i*(w-2*pad)/23,y=h-pad-(v/max)*(h-2*pad);i?ctx.lineTo(x,y):ctx.moveTo(x,y);});
   ctx.stroke();
-  
-  // 点
   data.forEach((v,i)=>{const x=pad+i*(w-2*pad)/23,y=h-pad-(v/max)*(h-2*pad);ctx.beginPath();ctx.arc(x,y,2,0,Math.PI*2);ctx.fillStyle='#4a9eff';ctx.fill();});
 }
 
+// 更新数据
 function updateData(){
-  // 更新健康度
   const health=(95+Math.random()*5).toFixed(1);
   document.getElementById('health-value').textContent=health+'%';
   drawRing('health-ring',parseFloat(health),'#4ade80','#22c55e');
-  
-  // 更新负载
   const load=(60+Math.random()*20).toFixed(1);
   document.getElementById('load-value').textContent=load+'%';
   drawRing('load-ring',parseFloat(load),'#4a9eff','#60a5fa');
-  
-  // 更新设备数
   const online=1000+Math.floor(Math.random()*50);
   const offline=Math.floor(Math.random()*5);
   document.getElementById('online-count').textContent=online;
