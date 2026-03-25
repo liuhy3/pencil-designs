@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>河南网络大屏</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <style>
+    * {margin:0;padding:0;box-sizing:border-box}
+    body {background:#0a1628;font-family:system-ui;color:#fff}
+    .container {display:grid;grid-template-columns:280px 1fr 280px;height:100vh;gap:12px;padding:12px}
+    .panel {background:linear-gradient(135deg,#0d1f3c,#0a1628);border:1px solid #4a9eff30;border-radius:8px;padding:16px}
+    .panel-title {font-size:14px;color:#4a9eff;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #4a9eff30}
+    #map {width:100%;height:100%}
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="panel">
+    <div class="panel-title">流量趋势</div>
+    <div id="traffic-chart" style="height:200px"></div>
+  </div>
+  <div class="panel" style="display:flex;flex-direction:column">
+    <div class="panel-title">河南网络拓扑</div>
+    <div id="map" style="flex:1"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">网络健康</div>
+    <div id="health-chart" style="height:200px"></div>
+  </div>
+</div>
+<script>
+  fetch('https://geo.datav.aliyun.com/areas_v3/bound/410000_full.json')
+    .then(res => res.json())
+    .then(geoJson => {
+      echarts.registerMap('henan', geoJson);
+      
+      const cityData = [
+        {name: '郑州市', value: 86},
+        {name: '开封市', value: 45},
+        {name: '洛阳市', value: 62},
+        {name: '平顶山市', value: 38},
+        {name: '安阳市', value: 42},
+        {name: '鹤壁市', value: 25},
+        {name: '新乡市', value: 48},
+        {name: '焦作市', value: 35},
+        {name: '濮阳市', value: 32},
+        {name: '许昌市', value: 52},
+        {name: '漯河市', value: 28},
+        {name: '三门峡市', value: 22},
+        {name: '南阳市', value: 55},
+        {name: '商丘市', value: 48},
+        {name: '信阳市', value: 42},
+        {name: '周口市', value: 38},
+        {name: '驻马店市', value: 35},
+        {name: '济源市', value: 12}
+      ];
+      
+      const mapChart = echarts.init(document.getElementById('map'));
+      mapChart.setOption({
+        tooltip: {trigger: 'item', formatter: '{b}<br/>流量: {c} Gbps'},
+        visualMap: {
+          min: 10,
+          max: 90,
+          left: 20,
+          bottom: 20,
+          text: ['高', '低'],
+          inRange: {color: ['#0d3b66', '#1a5f7a', '#2e8b9a', '#4db6ac', '#81c784']},
+          textStyle: {color: '#8ab4f8'},
+          calculable: true
+        },
+        series: [{
+          type: 'map',
+          map: 'henan',
+          roam: true,
+          zoom: 1.2,
+          label: {
+            show: true,
+            color: '#e0e8f0',
+            fontSize: 11,
+            formatter: p => p.name.replace('市', '')
+          },
+          itemStyle: {
+            borderColor: '#4a9eff',
+            borderWidth: 1.5
+          },
+          emphasis: {
+            label: {color: '#fff', fontSize: 13, fontWeight: 'bold'},
+            itemStyle: {borderColor: '#4ade80', borderWidth: 2}
+          },
+          data: cityData
+        }]
+      });
+      
+      // 其他图表
+      const healthChart = echarts.init(document.getElementById('health-chart'));
+      healthChart.setOption({
+        series: [{
+          type: 'gauge',
+          startAngle: 200,
+          endAngle: -20,
+          radius: '100%',
+          center: ['50%', '60%'],
+          axisLine: {lineStyle: {width: 10, color: [[0.8,'#4ade80'],[0.9,'#fbbf24'],[1,'#f87171']]}},
+          pointer: {show: false},
+          axisTick: {show: false},
+          splitLine: {show: false},
+          axisLabel: {show: false},
+          detail: {formatter: '{value}', fontSize: 22, fontWeight: 'bold', color: '#4ade80', offsetCenter: [0, '10%']},
+          data: [{value: 92}]
+        }]
+      });
+      
+      const trafficChart = echarts.init(document.getElementById('traffic-chart'));
+      trafficChart.setOption({
+        grid: {top: 10, right: 10, bottom: 20, left: 30},
+        xAxis: {
+          type: 'category',
+          data: ['0','2','4','6','8','10','12','14','16','18','20','22'],
+          axisLine: {lineStyle: {color: '#4a9eff'}},
+          axisLabel: {color: '#8ab4f8', fontSize: 9}
+        },
+        yAxis: {
+          type: 'value',
+          axisLine: {show: false},
+          axisLabel: {color: '#8ab4f8', fontSize: 9},
+          splitLine: {lineStyle: {color: '#4a9eff20'}}
+        },
+        series: [{
+          type: 'line',
+          data: [12,15,22,35,48,55,62,58,52,45,32,18],
+          smooth: true,
+          symbol: 'none',
+          lineStyle: {color: '#4a9eff', width: 2},
+          areaStyle: {color: {type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{offset: 0, color: '#4a9eff40'},{offset: 1, color: '#4a9eff05'}]}}
+        }]
+      });
+      
+      window.addEventListener('resize', () => {
+        mapChart.resize();
+        healthChart.resize();
+        trafficChart.resize();
+      });
+    });
+</script>
+</body>
+</html>
