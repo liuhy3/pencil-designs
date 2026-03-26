@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>河南省网络流量拓扑图</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <style>
+    * {margin:0;padding:0;box-sizing:border-box}
+    body {background:#0a1628;font-family:system-ui;color:#fff;overflow:hidden}
+    #main {width:100vw;height:100vh}
+  </style>
+</head>
+<body>
+  <div id="main"></div>
+  <script>
+    // 加载完整 GeoJSON 数据
+    fetch('https://geo.datav.aliyun.com/areas_v3/bound/410000_full.json')
+      .then(res => res.json())
+      .then(geoJson => {
+        // 注册地图
+        echarts.registerMap('henan', geoJson);
+        
+        // 从 GeoJSON 提取城市中心坐标
+        var cityCenters = {};
+        geoJson.features.forEach(function(f) {
+          var name = f.properties.name.replace('市', '');
+          cityCenters[name] = f.properties.center || f.properties.centroid;
+        });
+        
+        console.log('城市坐标:', cityCenters);
+        
+        // 流量数据
+        var trafficData = [
+          {name: '郑州市', value: 86},
+          {name: '开封市', value: 45},
+          {name: '洛阳市', value: 62},
+          {name: '平顶山市', value: 38},
+          {name: '安阳市', value: 42},
+          {name: '鹤壁市', value: 25},
+          {name: '新乡市', value: 48},
+          {name: '焦作市', value: 35},
+          {name: '濮阳市', value: 32},
+          {name: '许昌市', value: 52},
+          {name: '漯河市', value: 28},
+          {name: '三门峡市', value: 22},
+          {name: '南阳市', value: 55},
+          {name: '商丘市', value: 48},
+          {name: '信阳市', value: 42},
+          {name: '周口市', value: 38},
+          {name: '驻马店市', value: 35},
+          {name: '济源市', value: 12}
+        ];
+        
+        // 流量走向关系
+        var flowLines = [
+          {src: '郑州', dst: '开封', value: 45},
+          {src: '郑州', dst: '洛阳', value: 62},
+          {src: '郑州', dst: '新乡', value: 48},
+          {src: '郑州', dst: '许昌', value: 52},
+          {src: '郑州', dst: '平顶山', value: 38},
+          {src: '郑州', dst: '焦作', value: 35},
+          {src: '郑州', dst: '安阳', value: 42},
+          {src: '郑州', dst: '商丘', value: 48},
+          {src: '郑州', dst: '南阳', value: 55},
+          {src: '郑州', dst: '信阳', value: 42},
+          {src: '郑州', dst: '周口', value: 38},
+          {src: '洛阳', dst: '三门峡', value: 22},
+          {src: '洛阳', dst: '平顶山', value: 38},
+          {src: '洛阳', dst: '南阳', value: 55},
+          {src: '新乡', dst: '鹤壁', value: 25},
+          {src: '新乡', dst: '焦作', value: 35},
+          {src: '新乡', dst: '濮阳', value: 32},
+          {src: '许昌', dst: '漯河', value: 28},
+          {src: '南阳', dst: '驻马店', value: 35},
+          {src: '安阳', dst: '鹤壁', value: 25}
+        ];
+        
+        // 生成 lines 数据（带动态效果）
+        var linesData = flowLines.map(function(flow) {
+          var src = cityCenters[flow.src];
+          var dst = cityCenters[flow.dst];
+          if (!src || !dst) {
+            console.warn('找不到城市坐标:', flow.src, flow.dst);
+            return null;
+          }
+          return {
+            coords: [src, dst],
+            lineStyle: {
+              color: flow.value >= 50 ? '#f87171' : flow.value >= 30 ? '#60a5fa' : '#4a9eff',
+              width: flow.value >= 50 ? 3 : 2,
+              curveness: 0.2
+            }
+          };
+        }).filter(Boolean);
+        
+        // 生成 effectScatter 数据（节点）
+        var nodeData = Object.keys(cityCenters).map(function(name) {
+          var fullName = name + '市';
+          var value = trafficData.find(function(d) { return d.name === fullName; });
+          return {
+            name: name,
+            value: cityCenters[name].concat(value ? value.value : 30)
+          };
+        });
+        
+        var chart = echarts.init(document.getElementById('main'));
+        
+        var option = {
+          backgroundColor: '#0a1628',
+          title: {
+            text: '河南省网络流量拓扑图',
+            left: 'center',
+            top: 20,
+            textStyle: {
+              color: '#4a9eff',
+              fontSize: 24,
+              fontWeight: 'bold'
+            }
+          },
+          tooltip: {
+            trigger: 'item',
+            backgroundColor: '#0d1f3c',
+            borderColor: '#4a9eff',
+            textStyle: { color: '#fff' },
+            formatter: function(params) {
+              if (params.seriesType === 'effectScatter') {
+                return params.name + '<br/>流量: ' + params.value[2] + 'G';
+              } else if (params.seriesType === 'lines') {
+                return '流量线';
+              }
+              return params.name;
+            }
+          },
+          visualMap: {
+            min: 10,
+            max: 90,
+            left: 20,
+            bottom: 40,
+            text: ['高', '低'],
+            textStyle: { color: '#8ab4f8' },
+            inRange: {
+              color: ['#0d3b66', '#1a5f7a', '#2e8b9a', '#4db6ac', '#81c784']
+            },
+            calculable: true
+          },
+          geo: {
+            map: 'henan',
+            roam: true,
+            zoom: 1.2,
+            label: { 
+              show: true,
+              color: '#8ab4f8',
+              fontSize: 10
+            },
+            itemStyle: {
+              borderColor: '#4a9eff',
+              borderWidth: 1.5
+            },
+            emphasis: {
+              itemStyle: {
+                areaColor: '#1a3a5f'
+              }
+            }
+          },
+          series: [
+            // 地图填充色
+            {
+              type: 'map',
+              map: 'henan',
+              data: trafficData
+            },
+            // 流量走向线（动态）
+            {
+              type: 'lines',
+              zlevel: 2,
+              effect: {
+                show: true,
+                period: 4,
+                trailLength: 0.2,
+                symbol: 'arrow',
+                symbolSize: 5,
+                color: '#fff'
+              },
+              lineStyle: {
+                curveness: 0.2
+              },
+              data: linesData
+            },
+            // 节点（动态闪烁）
+            {
+              type: 'effectScatter',
+              coordinateSystem: 'geo',
+              zlevel: 3,
+              rippleEffect: {
+                brushType: 'stroke',
+                scale: 4
+              },
+              symbol: 'circle',
+              symbolSize: function(val) {
+                return val[2] / 3 + 5;
+              },
+              itemStyle: {
+                color: '#f87171'
+              },
+              label: {
+                show: true,
+                position: 'right',
+                formatter: '{b}',
+                fontSize: 10,
+                color: '#8ab4f8'
+              },
+              data: nodeData
+            }
+          ]
+        };
+        
+        chart.setOption(option);
+        window.addEventListener('resize', () => chart.resize());
+      })
+      .catch(err => {
+        console.error('加载地图失败:', err);
+        document.getElementById('main').innerHTML = '<div style="color:#f87171;padding:20px;">地图加载失败: ' + err.message + '</div>';
+      });
+  </script>
+</body>
+</html>
