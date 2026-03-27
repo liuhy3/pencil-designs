@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录页面 - Ant Design 风格</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #F8FAFC;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .login-container {
+      width: 375px;
+      min-height: 812px;
+      background: #F8FAFC;
+      padding: 40px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      align-items: center;
+      justify-content: center;
+    }
+    .logo-section {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+    }
+    .logo-text {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1677ff;
+    }
+    .welcome-text {
+      font-size: 14px;
+      color: rgba(0,0,0,0.45);
+    }
+    .login-form {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .input-field {
+      width: 100%;
+      height: 48px;
+      background: #ffffff;
+      border: 1px solid #d9d9d9;
+      border-radius: 6px;
+      padding: 12px 16px;
+      font-size: 14px;
+      color: rgba(0,0,0,0.25);
+      display: flex;
+      align-items: center;
+    }
+    .input-field:focus {
+      border-color: #1677ff;
+      outline: none;
+      color: rgba(0,0,0,0.88);
+    }
+    .remember-row {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .remember-text {
+      font-size: 14px;
+      color: rgba(0,0,0,0.65);
+    }
+    .forgot-text {
+      font-size: 14px;
+      color: #1677ff;
+      cursor: pointer;
+    }
+    .btn-login {
+      width: 100%;
+      height: 48px;
+      background: #1677ff;
+      border: none;
+      border-radius: 6px;
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .btn-login:hover {
+      background: #4096ff;
+    }
+    .divider-section {
+      width: 100%;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+    .divider-line {
+      flex: 1;
+      height: 1px;
+      background: #d9d9d9;
+    }
+    .divider-text {
+      font-size: 14px;
+      color: rgba(0,0,0,0.25);
+    }
+    .social-buttons {
+      width: 100%;
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+    .btn-social {
+      width: 100px;
+      height: 40px;
+      border: none;
+      border-radius: 6px;
+      color: #ffffff;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .btn-wechat {
+      background: #07C160;
+    }
+    .btn-qq {
+      background: #12B7F5;
+    }
+    .register-link {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+    }
+    .register-text {
+      font-size: 14px;
+      color: rgba(0,0,0,0.45);
+    }
+    .register-link-text {
+      font-size: 14px;
+      color: #1677ff;
+      cursor: pointer;
+    }
+    
+    /* 设计说明 */
+    .design-info {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #ffffff;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      max-width: 300px;
+    }
+    .design-info h3 {
+      color: #1677ff;
+      margin-bottom: 8px;
+    }
+    .design-info p {
+      font-size: 12px;
+      color: rgba(0,0,0,0.65);
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <!-- Logo 区域 -->
+    <div class="logo-section">
+      <div class="logo-text">🦐 OpenClaw</div>
+      <div class="welcome-text">欢迎回来，请登录您的账号</div>
+    </div>
+    
+    <!-- 登录表单 -->
+    <div class="login-form">
+      <input type="text" class="input-field" placeholder="👤 用户名 / 邮箱">
+      <input type="password" class="input-field" placeholder="🔒 密码">
+      
+      <div class="remember-row">
+        <span class="remember-text">记住我</span>
+        <span class="forgot-text">忘记密码？</span>
+      </div>
+      
+      <button class="btn-login">登 录</button>
+    </div>
+    
+    <!-- 分割线 -->
+    <div class="divider-section">
+      <div class="divider-line"></div>
+      <span class="divider-text">或</span>
+      <div class="divider-line"></div>
+    </div>
+    
+    <!-- 社交登录 -->
+    <div class="social-buttons">
+      <button class="btn-social btn-wechat">微信</button>
+      <button class="btn-social btn-qq">QQ</button>
+    </div>
+    
+    <!-- 注册链接 -->
+    <div class="register-link">
+      <span class="register-text">还没有账号？</span>
+      <span class="register-link-text">立即注册</span>
+    </div>
+  </div>
+  
+  <!-- 设计说明 -->
+  <div class="design-info">
+    <h3>🎨 设计说明</h3>
+    <p>
+      <strong>设计工具：</strong>Pencil MCP + Ant Design<br>
+      <strong>页面尺寸：</strong>375 × 812px（移动端）<br>
+      <strong>主色调：</strong>#1677ff（Ant Design 蓝）<br>
+      <strong>组件：</strong>输入框、按钮、分割线、社交登录
+    </p>
+  </div>
+</body>
+</html>

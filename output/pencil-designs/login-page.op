@@ -1,0 +1,130 @@
+{
+  "version": "1.0.0",
+  "variables": {
+    "ant-primary": "#1677ff",
+    "ant-primary-hover": "#4096ff",
+    "ant-text": "rgba(0,0,0,0.88)",
+    "ant-border": "#d9d9d9",
+    "ant-bg": "#ffffff"
+  },
+  "children": [
+    {
+      "id": "login-page",
+      "type": "frame",
+      "name": "登录页面",
+      "width": 375,
+      "height": 812,
+      "layout": "vertical",
+      "fill": [{"type": "solid", "color": "#F8FAFC"}],
+      "padding": [40, 24],
+      "gap": 24,
+      "alignItems": "center",
+      "justifyContent": "center",
+      "children": [
+        {
+          "id": "logo-section",
+          "type": "frame",
+          "name": "Logo区域",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 8,
+          "alignItems": "center",
+          "children": [
+            {
+              "id": "logo-text",
+              "type": "text",
+              "name": "Logo",
+              "content": "🦐 OpenClaw",
+              "fontSize": 28,
+              "fontWeight": 700,
+              "fill": [{"type": "solid", "color": "#1677ff"}]
+            },
+            {
+              "id": "welcome-text",
+              "type": "text",
+              "content": "欢迎回来，请登录您的账号",
+              "fontSize": 14,
+              "fill": [{"type": "solid", "color": "rgba(0,0,0,0.45)"}]
+            }
+          ]
+        },
+        {
+          "id": "login-form",
+          "type": "frame",
+          "name": "登录表单",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 16,
+          "children": [
+            {
+              "id": "input-username",
+              "type": "frame",
+              "name": "用户名输入框",
+              "width": "fill_container",
+              "height": 48,
+              "layout": "horizontal",
+              "padding": [12, 16],
+              "alignItems": "center",
+              "fill": [{"type": "solid", "color": "#ffffff"}],
+              "stroke": {"thickness": 1, "fill": [{"type": "solid", "color": "#d9d9d9"}]},
+              "cornerRadius": 6,
+              "children": [
+                {
+                  "id": "username-placeholder",
+                  "type": "text",
+                  "content": "👤 用户名 / 邮箱",
+                  "fontSize": 14,
+                  "fill": [{"type": "solid", "color": "rgba(0,0,0,0.25)"}]
+                }
+              ]
+            },
+            {
+              "id": "input-password",
+              "type": "frame",
+              "name": "密码输入框",
+              "width": "fill_container",
+              "height": 48,
+              "layout": "horizontal",
+              "padding": [12, 16],
+              "alignItems": "center",
+              "fill": [{"type": "solid", "color": "#ffffff"}],
+              "stroke": {"thickness": 1, "fill": [{"type": "solid", "color": "#d9d9d9"}]},
+              "cornerRadius": 6,
+              "children": [
+                {
+                  "id": "password-placeholder",
+                  "type": "text",
+                  "content": "🔒 密码",
+                  "fontSize": 14,
+                  "fill": [{"type": "solid", "color": "rgba(0,0,0,0.25)"}]
+                }
+              ]
+            },
+            {
+              "id": "btn-login",
+              "type": "frame",
+              "name": "登录按钮",
+              "width": "fill_container",
+              "height": 48,
+              "layout": "horizontal",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "fill": [{"type": "solid", "color": "#1677ff"}],
+              "cornerRadius": 6,
+              "children": [
+                {
+                  "id": "btn-login-text",
+                  "type": "text",
+                  "content": "登 录",
+                  "fontSize": 16,
+                  "fontWeight": 500,
+                  "fill": [{"type": "solid", "color": "#ffffff"}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

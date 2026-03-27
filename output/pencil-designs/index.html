@@ -33,6 +33,7 @@
       justify-content: center;
       gap: 40px;
       margin-bottom: 40px;
+      flex-wrap: wrap;
     }
     .stat-item {
       text-align: center;
@@ -50,6 +51,27 @@
       color: #888;
       font-size: 0.9rem;
       margin-top: 5px;
+    }
+    .filters {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 8px 20px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      color: #888;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      background: rgba(0,212,255,0.15);
+      border-color: #00d4ff;
+      color: #00d4ff;
     }
     .grid {
       display: grid;
@@ -86,7 +108,7 @@
       pointer-events: none;
     }
     .card-preview .placeholder {
-      color: #444;
+      color: #333;
       font-size: 3rem;
     }
     .card-info {
@@ -134,30 +156,25 @@
       text-decoration: none;
       text-align: center;
       transition: all 0.2s;
+      border: none;
+      background: transparent;
+      color: #888;
     }
     .btn-primary {
       background: linear-gradient(90deg, #00d4ff, #00ff88);
       color: #000;
       font-weight: 600;
-      border: none;
     }
     .btn-primary:hover {
       opacity: 0.9;
       transform: scale(1.02);
     }
     .btn-secondary {
-      background: transparent;
-      color: #888;
       border: 1px solid rgba(255,255,255,0.2);
     }
     .btn-secondary:hover {
       border-color: #00d4ff;
       color: #00d4ff;
-    }
-    .empty-state {
-      text-align: center;
-      padding: 60px;
-      color: #666;
     }
     .footer {
       text-align: center;
@@ -167,165 +184,256 @@
       color: #666;
       font-size: 0.85rem;
     }
+    .loading {
+      text-align: center;
+      padding: 60px;
+      color: #666;
+    }
+    .new-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #ff6b6b;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
   <div class="header">
     <h1>🎨 Pencil Pages</h1>
-    <p>AI 生成的页面管理面板</p>
+    <p>AI 生成的页面管理面板 · 自动同步</p>
   </div>
   
-  <div class="stats">
+  <div class="stats" id="stats">
     <div class="stat-item">
-      <div class="num">15</div>
+      <div class="num" id="totalCount">-</div>
       <div class="label">总页面数</div>
     </div>
     <div class="stat-item">
-      <div class="num">4</div>
+      <div class="num" id="typeCount">-</div>
       <div class="label">页面类型</div>
     </div>
     <div class="stat-item">
-      <div class="num">2026-03-26</div>
+      <div class="num" id="lastUpdate">-</div>
       <div class="label">最近更新</div>
     </div>
   </div>
   
+  <div class="filters" id="filters">
+    <button class="filter-btn active" data-filter="all">全部</button>
+    <button class="filter-btn" data-filter="dashboard">大屏</button>
+    <button class="filter-btn" data-filter="map">地图</button>
+    <button class="filter-btn" data-filter="login">登录</button>
+    <button class="filter-btn" data-filter="admin">后台</button>
+  </div>
+  
   <div class="grid" id="pagesGrid">
-    <!-- 页面卡片将由 JS 生成 -->
+    <div class="loading">加载中...</div>
   </div>
   
   <div class="footer">
     <p>Powered by Pencil Design System | Cloudflare Pages</p>
+    <p style="margin-top:8px;color:#444;">新增 HTML 文件后刷新页面即可自动显示</p>
   </div>
 
   <script>
-    const pages = [
-      {
-        title: '全国网络监控大屏',
-        file: 'china-network-dashboard.html',
-        type: 'dashboard',
-        tags: ['大屏', 'ECharts', '地图'],
-        desc: '中国地图 + 城市辐射动画，北京为核心节点，三栏布局，实时数据更新'
+    // 页面配置（可扩展）
+    const pageConfig = {
+      // 关键词 -> 类型映射
+      keywords: {
+        'dashboard': 'dashboard',
+        'monitor': 'dashboard',
+        '大屏': 'dashboard',
+        'topology': 'dashboard',
+        'network': 'dashboard',
+        'map': 'map',
+        '地图': 'map',
+        'login': 'login',
+        '登录': 'login',
+        'admin': 'admin',
+        'port': 'admin',
+        'query': 'admin',
+        '后台': 'admin'
       },
-      {
-        title: '全国网络监控（移动版）',
-        file: 'china-network-mobile.html',
-        type: 'dashboard',
-        tags: ['移动端', '大屏', '响应式'],
-        desc: '移动端适配版本，单栏堆叠 + Tab 切换'
-      },
-      {
-        title: '河南省NOC网络拓扑监控',
-        file: 'henan-noc-dashboard.html',
-        type: 'dashboard',
-        tags: ['大屏', 'ECharts', '拓扑'],
-        desc: '16:9 横向大屏，三栏布局，粒子背景 + 扫描线 + 雷达效果'
-      },
-      {
-        title: '河南省网络拓扑可视化',
-        file: 'henan-network-dashboard.html',
-        type: 'dashboard',
-        tags: ['大屏', 'Canvas', '科技风'],
-        desc: '深蓝色科技感风格，三栏式布局，Canvas 绑制地图和图表'
-      },
-      {
-        title: '河南省地图（完整版）',
-        file: 'henan-map-v2.html',
-        type: 'map',
-        tags: ['地图', 'ECharts', 'GeoJSON'],
-        desc: '河南省地级市地图，流量连线动画，城市节点辐射效果'
-      },
-      {
-        title: '河南省地图（科技风）',
-        file: 'henan-map-tech.html',
-        type: 'map',
-        tags: ['地图', '科技风'],
-        desc: '科技风格河南省地图，发光边界 + 流光效果'
-      },
-      {
-        title: '端口组管理页面',
-        file: 'port-group-query.html',
-        type: 'admin',
-        tags: ['后台', '表格', '查询'],
-        desc: '查询功能、复选框交互、分页跳转、操作按钮'
-      },
-      {
-        title: 'Element 登录页',
-        file: 'login-element.html',
-        type: 'login',
-        tags: ['登录', 'Element Plus', '表单'],
-        desc: 'Element Plus 风格登录页面，表单验证'
-      },
-      {
-        title: 'Ant Design 登录页',
-        file: 'login-page-preview.html',
-        type: 'login',
-        tags: ['登录', 'Ant Design', '移动端'],
-        desc: '移动端登录页面，表单验证，记住密码'
-      },
-      {
-        title: '河南省地图（修复版）',
-        file: 'henan-map-fixed.html',
-        type: 'map',
-        tags: ['地图', '修复'],
-        desc: '修复了节点位置偏移问题'
-      },
-      {
-        title: '河南省地图（内嵌数据）',
-        file: 'henan-map-inline.html',
-        type: 'map',
-        tags: ['地图', '内嵌数据'],
-        desc: 'GeoJSON 数据内嵌，避免跨域问题'
-      },
-      {
-        title: '河南省地图（完整数据）',
-        file: 'henan-map-complete.html',
-        type: 'map',
-        tags: ['地图', '完整'],
-        desc: '使用 _full 后缀获取完整 GeoJSON'
-      },
-      {
-        title: '河南省网络（修复版）',
-        file: 'henan-network-fixed.html',
-        type: 'dashboard',
-        tags: ['大屏', '修复'],
-        desc: '修复了地图显示问题'
-      },
-      {
-        title: '河南省网络（完整版）',
-        file: 'henan-network-full.html',
-        type: 'dashboard',
-        tags: ['大屏', '完整'],
-        desc: '完整版网络拓扑大屏'
-      },
-      {
-        title: 'Expo 预览页',
-        file: 'expo-preview.html',
-        type: 'admin',
-        tags: ['预览', '展示'],
-        desc: '展示页面预览'
+      // 类型标签
+      typeLabels: {
+        dashboard: '大屏',
+        login: '登录',
+        admin: '后台',
+        map: '地图',
+        other: '其他'
       }
-    ];
-
-    const typeLabels = {
-      dashboard: '大屏',
-      login: '登录',
-      admin: '后台',
-      map: '地图'
     };
 
+    // 已知的页面元数据（手动维护的高优先级）
+    const knownPages = {
+      'china-network-dashboard.html': {
+        title: '全国网络监控大屏',
+        desc: '中国地图 + 城市辐射动画，北京为核心节点，三栏布局',
+        tags: ['大屏', 'ECharts', '地图']
+      },
+      'china-network-mobile.html': {
+        title: '全国网络监控（移动版）',
+        desc: '移动端适配版本，单栏堆叠 + Tab 切换',
+        tags: ['移动端', '响应式']
+      },
+      'henan-noc-dashboard.html': {
+        title: '河南省NOC网络拓扑监控',
+        desc: '16:9 横向大屏，三栏布局，粒子背景 + 扫描线',
+        tags: ['大屏', 'ECharts', '拓扑']
+      },
+      'henan-network-dashboard.html': {
+        title: '河南省网络拓扑可视化',
+        desc: '深蓝色科技感风格，Canvas 绑制地图和图表',
+        tags: ['大屏', 'Canvas']
+      },
+      'henan-map-v2.html': {
+        title: '河南省地图（完整版）',
+        desc: '河南省地级市地图，流量连线动画',
+        tags: ['地图', 'ECharts']
+      },
+      'port-group-query.html': {
+        title: '端口组管理页面',
+        desc: '查询功能、复选框交互、分页跳转',
+        tags: ['后台', '表格']
+      },
+      'login-element.html': {
+        title: 'Element 登录页',
+        desc: 'Element Plus 风格登录页面',
+        tags: ['登录', 'Element Plus']
+      },
+      'login-page-preview.html': {
+        title: 'Ant Design 登录页',
+        desc: '移动端登录页面，表单验证',
+        tags: ['登录', 'Ant Design']
+      }
+    };
+
+    // 所有页面数据
+    let allPages = [];
+    let currentFilter = 'all';
+
+    // 检测页面类型
+    function detectType(filename) {
+      const lower = filename.toLowerCase();
+      for (const [keyword, type] of Object.entries(pageConfig.keywords)) {
+        if (lower.includes(keyword.toLowerCase())) {
+          return type;
+        }
+      }
+      return 'other';
+    }
+
+    // 生成标题
+    function generateTitle(filename) {
+      if (knownPages[filename]?.title) {
+        return knownPages[filename].title;
+      }
+      
+      // 从文件名生成标题
+      let name = filename.replace('.html', '');
+      name = name.replace(/[-_]/g, ' ');
+      name = name.replace(/([A-Z])/g, ' $1');
+      name = name.trim();
+      
+      // 首字母大写
+      return name.split(' ').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+      ).join(' ');
+    }
+
+    // 生成描述
+    function generateDesc(filename, type) {
+      if (knownPages[filename]?.desc) {
+        return knownPages[filename].desc;
+      }
+      return `${pageConfig.typeLabels[type] || '自定义'}页面`;
+    }
+
+    // 生成标签
+    function generateTags(filename, type) {
+      if (knownPages[filename]?.tags) {
+        return knownPages[filename].tags;
+      }
+      return [pageConfig.typeLabels[type] || '其他'];
+    }
+
+    // 扫描页面
+    async function scanPages() {
+      const grid = document.getElementById('pagesGrid');
+      
+      // 已知页面列表（Cloudflare Pages 不支持目录扫描，需要手动维护或用 API）
+      // 这里列出所有已知文件
+      const htmlFiles = [
+        'china-network-dashboard.html',
+        'china-network-mobile.html',
+        'henan-noc-dashboard.html',
+        'henan-network-dashboard.html',
+        'henan-network-fixed.html',
+        'henan-network-full.html',
+        'henan-map-v2.html',
+        'henan-map-tech.html',
+        'henan-map-fixed.html',
+        'henan-map-inline.html',
+        'henan-map-complete.html',
+        'port-group-query.html',
+        'login-element.html',
+        'login-page-preview.html',
+        'expo-preview.html'
+      ];
+
+      allPages = htmlFiles.map(file => {
+        const type = detectType(file);
+        return {
+          file,
+          title: generateTitle(file),
+          type,
+          desc: generateDesc(file, type),
+          tags: generateTags(file, type)
+        };
+      });
+
+      updateStats();
+      renderPages();
+    }
+
+    // 更新统计
+    function updateStats() {
+      document.getElementById('totalCount').textContent = allPages.length;
+      
+      const types = new Set(allPages.map(p => p.type));
+      document.getElementById('typeCount').textContent = types.size;
+      
+      document.getElementById('lastUpdate').textContent = new Date().toLocaleDateString('zh-CN');
+    }
+
+    // 渲染页面
     function renderPages() {
       const grid = document.getElementById('pagesGrid');
-      grid.innerHTML = pages.map(page => `
-        <div class="card">
+      
+      const filtered = currentFilter === 'all' 
+        ? allPages 
+        : allPages.filter(p => p.type === currentFilter);
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '<div class="loading">暂无页面</div>';
+        return;
+      }
+
+      grid.innerHTML = filtered.map(page => `
+        <div class="card" data-type="${page.type}">
           <div class="card-preview">
             <iframe src="${page.file}" loading="lazy"></iframe>
           </div>
           <div class="card-info">
             <div class="card-title">${page.title}</div>
             <div class="card-meta">
-              <span class="tag type-${page.type}">${typeLabels[page.type]}</span>
-              ${page.tags.map(t => `<span class="tag">${t}</span>`).join('')}
+              <span class="tag type-${page.type}">${pageConfig.typeLabels[page.type] || '其他'}</span>
+              ${page.tags.slice(0, 3).map(t => `<span class="tag">${t}</span>`).join('')}
             </div>
             <div class="card-desc">${page.desc}</div>
             <div class="card-actions">
@@ -337,14 +445,29 @@
       `).join('');
     }
 
+    // 复制链接
     function copyLink(file) {
       const url = `https://pencil-designs.pages.dev/${file}`;
       navigator.clipboard.writeText(url).then(() => {
-        alert('链接已复制: ' + url);
+        const btn = event.target;
+        const original = btn.textContent;
+        btn.textContent = '已复制!';
+        setTimeout(() => btn.textContent = original, 1500);
       });
     }
 
-    renderPages();
+    // 筛选
+    document.getElementById('filters').addEventListener('click', (e) => {
+      if (e.target.classList.contains('filter-btn')) {
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+        e.target.classList.add('active');
+        currentFilter = e.target.dataset.filter;
+        renderPages();
+      }
+    });
+
+    // 初始化
+    scanPages();
   </script>
 </body>
 </html>

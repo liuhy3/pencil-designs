@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录页面 - React Native 预览</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    h1 { color: #1677ff; margin-bottom: 10px; }
+    .subtitle { color: #666; margin-bottom: 30px; }
+    .step {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 15px;
+    }
+    .step h3 { color: #333; margin-bottom: 10px; }
+    .step p { color: #666; font-size: 14px; }
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 10px;
+      text-align: center;
+      text-decoration: none;
+    }
+    .btn-primary { background: #1677ff; color: white; }
+    .btn-primary:hover { background: #4096ff; }
+    .btn-secondary { background: #f0f0f0; color: #333; }
+    .btn-secondary:hover { background: #e0e0e0; }
+    .code-box {
+      background: #1e1e1e;
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 20px;
+      display: none;
+    }
+    .code-box.show { display: block; }
+    .code-box pre {
+      color: #d4d4d4;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .copy-btn {
+      background: #333;
+      color: white;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+    .copy-btn:hover { background: #555; }
+    .qr-section {
+      text-align: center;
+      margin-top: 30px;
+      padding-top: 30px;
+      border-top: 1px solid #eee;
+    }
+    .qr-section h3 { color: #333; margin-bottom: 15px; }
+    .qr-section p { color: #666; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🦐 登录页面</h1>
+    <p class="subtitle">Pencil MCP + Ant Design 风格</p>
+    
+    <div class="step">
+      <h3>📱 方式一：在线预览</h3>
+      <p>点击下方按钮，跳转到 Expo Snack 在线编辑器预览效果</p>
+    </div>
+    
+    <a href="https://snack.expo.dev" target="_blank" class="btn btn-primary">
+      打开 Expo Snack 编辑器
+    </a>
+    
+    <button class="btn btn-secondary" onclick="toggleCode()">
+      查看/复制代码
+    </button>
+    
+    <div class="code-box" id="codeBox">
+      <button class="copy-btn" onclick="copyCode()">📋 复制代码</button>
+      <pre id="codeContent">import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+
+export default function App() {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLogin = () => {
+    Alert.alert('登录', `用户名: ${username}`);
+  };
+
+  return (
+    &lt;SafeAreaView style={styles.safeArea}&gt;
+      &lt;KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}&gt;
+        &lt;View style={styles.logoSection}&gt;
+          &lt;Text style={styles.logoText}&gt;🦐 OpenClaw&lt;/Text&gt;
+          &lt;Text style={styles.welcomeText}&gt;欢迎回来，请登录您的账号&lt;/Text&gt;
+        &lt;/View&gt;
+
+        &lt;View style={styles.loginForm}&gt;
+          &lt;TextInput style={styles.input} placeholder="👤 用户名 / 邮箱" placeholderTextColor="rgba(0,0,0,0.25)" value={username} onChangeText={setUsername} /&gt;
+          &lt;TextInput style={styles.input} placeholder="🔒 密码" placeholderTextColor="rgba(0,0,0,0.25)" value={password} onChangeText={setPassword} secureTextEntry /&gt;
+          &lt;TouchableOpacity style={styles.loginButton} onPress={handleLogin}&gt;
+            &lt;Text style={styles.loginButtonText}&gt;登 录&lt;/Text&gt;
+          &lt;/TouchableOpacity&gt;
+        &lt;/View&gt;
+
+        &lt;View style={styles.dividerSection}&gt;
+          &lt;View style={styles.dividerLine} /&gt;
+          &lt;Text style={styles.dividerText}&gt;或&lt;/Text&gt;
+          &lt;View style={styles.dividerLine} /&gt;
+        &lt;/View&gt;
+
+        &lt;View style={styles.socialButtons}&gt;
+          &lt;TouchableOpacity style={[styles.socialButton, { backgroundColor: '#07C160' }]}&gt;&lt;Text style={styles.socialButtonText}&gt;微信&lt;/Text&gt;&lt;/TouchableOpacity&gt;
+          &lt;TouchableOpacity style={[styles.socialButton, { backgroundColor: '#12B7F5' }]}&gt;&lt;Text style={styles.socialButtonText}&gt;QQ&lt;/Text&gt;&lt;/TouchableOpacity&gt;
+        &lt;/View&gt;
+
+        &lt;View style={styles.registerLink}&gt;
+          &lt;Text style={styles.registerText}&gt;还没有账号？&lt;/Text&gt;
+          &lt;TouchableOpacity&gt;&lt;Text style={styles.registerLinkText}&gt;立即注册&lt;/Text&gt;&lt;/TouchableOpacity&gt;
+        &lt;/View&gt;
+      &lt;/KeyboardAvoidingView&gt;
+    &lt;/SafeAreaView&gt;
+  );
+}
+
+const styles = StyleSheet.create({
+  safeArea: { flex: 1, backgroundColor: '#F8FAFC' },
+  container: { flex: 1, backgroundColor: '#F8FAFC', paddingHorizontal: 24, justifyContent: 'center' },
+  logoSection: { alignItems: 'center', marginBottom: 32 },
+  logoText: { fontSize: 28, fontWeight: '700', color: '#1677ff', marginBottom: 8 },
+  welcomeText: { fontSize: 14, color: 'rgba(0,0,0,0.45)' },
+  loginForm: { marginBottom: 24 },
+  input: { height: 48, backgroundColor: '#fff', borderWidth: 1, borderColor: '#d9d9d9', borderRadius: 6, paddingHorizontal: 16, fontSize: 14, marginBottom: 16 },
+  rememberRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+  loginButton: { height: 48, backgroundColor: '#1677ff', borderRadius: 6, justifyContent: 'center', alignItems: 'center' },
+  loginButtonText: { fontSize: 16, fontWeight: '500', color: '#fff' },
+  dividerSection: { flexDirection: 'row', alignItems: 'center', marginBottom: 24 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: '#d9d9d9' },
+  dividerText: { fontSize: 14, color: 'rgba(0,0,0,0.25)', marginHorizontal: 16 },
+  socialButtons: { flexDirection: 'row', justifyContent: 'center', gap: 12, marginBottom: 24 },
+  socialButton: { width: 100, height: 40, borderRadius: 6, justifyContent: 'center', alignItems: 'center' },
+  socialButtonText: { fontSize: 14, color: '#fff' },
+  registerLink: { flexDirection: 'row', justifyContent: 'center' },
+  registerText: { fontSize: 14, color: 'rgba(0,0,0,0.45)' },
+  registerLinkText: { fontSize: 14, color: '#1677ff' },
+});</pre>
+    </div>
+    
+    <div class="qr-section">
+      <h3>📲 手机扫码预览</h3>
+      <p>1. 下载 Expo Go App（App Store / Google Play）</p>
+      <p>2. 在 Expo Snack 中粘贴代码</p>
+      <p>3. 点击运行按钮，扫描二维码</p>
+    </div>
+  </div>
+  
+  <script>
+    function toggleCode() {
+      document.getElementById('codeBox').classList.toggle('show');
+    }
+    
+    function copyCode() {
+      const code = document.getElementById('codeContent').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        alert('代码已复制到剪贴板！');
+      });
+    }
+  </script>
+</body>
+</html>
