@@ -271,6 +271,11 @@
 
     // 已知的页面元数据（手动维护的高优先级）
     const knownPages = {
+      'register-page.html': {
+        title: '用户注册页面',
+        desc: '现代化注册页面，支持表单验证、密码强度检测、社交登录',
+        tags: ['注册', '表单', '响应式']
+      },
       'china-network-dashboard.html': {
         title: '全国网络监控大屏',
         desc: '中国地图 + 城市辐射动画，北京为核心节点，三栏布局',
@@ -369,6 +374,7 @@
       // 已知页面列表（Cloudflare Pages 不支持目录扫描，需要手动维护或用 API）
       // 这里列出所有已知文件
       const htmlFiles = [
+        'register-page.html',
         'china-network-dashboard.html',
         'china-network-mobile.html',
         'henan-noc-dashboard.html',
