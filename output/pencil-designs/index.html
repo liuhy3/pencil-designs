@@ -271,6 +271,11 @@
 
     // 已知的页面元数据（手动维护的高优先级）
     const knownPages = {
+      'china-network-dashboard-v2.html': {
+        title: '全国网络监控大屏（修复版）',
+        desc: '修复地图加载问题，使用 jsdelivr CDN 托管 GeoJSON',
+        tags: ['大屏', '地图', '修复']
+      },
       'register-page.html': {
         title: '用户注册页面',
         desc: '现代化注册页面，支持表单验证、密码强度检测、社交登录',
@@ -315,6 +320,11 @@
         title: 'Ant Design 登录页',
         desc: '移动端登录页面，表单验证',
         tags: ['登录', 'Ant Design']
+      },
+      'admin-login-antd.html': {
+        title: '后台登录页（Ant Design）',
+        desc: '左侧品牌展示 + 右侧登录表单，社交登录，响应式布局',
+        tags: ['登录', '后台', 'Ant Design']
       }
     };
 
@@ -374,6 +384,7 @@
       // 已知页面列表（Cloudflare Pages 不支持目录扫描，需要手动维护或用 API）
       // 这里列出所有已知文件
       const htmlFiles = [
+        'china-network-dashboard-v2.html',
         'register-page.html',
         'china-network-dashboard.html',
         'china-network-mobile.html',
