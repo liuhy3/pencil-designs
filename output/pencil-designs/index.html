@@ -258,7 +258,11 @@
         'admin': 'admin',
         'port': 'admin',
         'query': 'admin',
-        '后台': 'admin'
+        '后台': 'admin',
+        'chat': 'chat',
+        '对话': 'chat',
+        'ai': 'chat',
+        '聊天': 'chat'
       },
       // 类型标签
       typeLabels: {
@@ -266,6 +270,7 @@
         login: '登录',
         admin: '后台',
         map: '地图',
+        chat: '对话',
         other: '其他'
       }
     };
@@ -326,6 +331,11 @@
         title: '后台登录页（Ant Design）',
         desc: '左侧品牌展示 + 右侧登录表单，社交登录，响应式布局',
         tags: ['登录', '后台', 'Ant Design']
+      },
+      'ai-chat-interface.html': {
+        title: 'AI 对话界面',
+        desc: '简洁的 AI 聊天界面，左侧对话列表 + 右侧聊天区域，支持快捷操作',
+        tags: ['AI', '对话', '聊天']
       }
     };
 
@@ -385,6 +395,7 @@
       // 已知页面列表（Cloudflare Pages 不支持目录扫描，需要手动维护或用 API）
       // 这里列出所有已知文件
       const htmlFiles = [
+        'ai-chat-interface.html',
         'china-network-dashboard-v2.html',
         'register-page.html',
         'china-network-dashboard.html',

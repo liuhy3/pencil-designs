@@ -1,0 +1,72 @@
+{
+  "name": "AI 对话界面",
+  "createdAt": "2026-04-01T09:38:00Z",
+  "style": "简约现代风格",
+  "primaryColor": "#0d9488",
+  "layout": {
+    "sidebar": {
+      "width": 260,
+      "background": "#1f2937",
+      "components": [
+        { "type": "header", "title": "AI 助手" },
+        { "type": "button", "text": "新建对话", "action": "createConversation" },
+        { "type": "list", "name": "对话列表" }
+      ]
+    },
+    "mainChat": {
+      "background": "#ffffff",
+      "components": [
+        { "type": "header", "includes": ["title", "modelSelector"] },
+        { "type": "messagesArea", "maxWidth": "80%" },
+        { "type": "quickActions", "buttons": ["继续写作", "重新生成", "复制内容"] },
+        { "type": "inputArea", "features": ["textarea", "upload", "send"] }
+      ]
+    }
+  },
+  "components": [
+    {
+      "name": "消息气泡",
+      "aiStyle": {
+        "background": "#e8f5f3",
+        "borderRadius": "12px 12px 12px 4px",
+        "color": "#111827"
+      },
+      "userStyle": {
+        "background": "#0d9488",
+        "borderRadius": "12px 12px 4px 12px",
+        "color": "#ffffff"
+      }
+    },
+    {
+      "name": "头像",
+      "size": 40,
+      "aiEmoji": "🤖",
+      "userEmoji": "👤"
+    },
+    {
+      "name": "输入框",
+      "minHeight": 24,
+      "maxHeight": 120,
+      "placeholder": "输入你的问题..."
+    }
+  ],
+  "interactions": [
+    { "event": "click", "target": "sendBtn", "action": "sendMessage" },
+    { "event": "keydown", "key": "Enter", "action": "sendMessage" },
+    { "event": "keydown", "key": "Shift+Enter", "action": "newLine" },
+    { "event": "click", "target": "chatItem", "action": "switchConversation" },
+    { "event": "click", "target": "newChatBtn", "action": "createConversation" }
+  ],
+  "responsive": {
+    "mobile": {
+      "breakpoint": 768,
+      "sidebar": "hidden",
+      "messageMaxWidth": "90%"
+    },
+    "tablet": {
+      "breakpoint": 1024,
+      "sidebarWidth": 200,
+      "messageMaxWidth": "85%"
+    }
+  }
+}
