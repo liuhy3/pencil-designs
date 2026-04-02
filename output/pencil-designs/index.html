@@ -341,6 +341,11 @@
         title: '后端登录界面',
         desc: '管理员登录页面，含验证码、多重身份验证、社交登录入口',
         tags: ['登录', '后台', '验证码']
+      },
+      'app-register.html': {
+        title: 'APP 注册页面',
+        desc: 'Vant 移动端风格注册页面，支持验证码、密码强度检测、微信/Apple社交登录',
+        tags: ['注册', '移动端', 'Vant']
       }
     };
 
@@ -400,6 +405,7 @@
       // 已知页面列表（Cloudflare Pages 不支持目录扫描，需要手动维护或用 API）
       // 这里列出所有已知文件
       const htmlFiles = [
+        'app-register.html',
         'backend-login.html',
         'ai-chat-interface.html',
         'china-network-dashboard-v2.html',

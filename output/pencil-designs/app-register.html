@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>注册 - APP</title>
+  <!-- Vant 4 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vant@4/lib/index.css">
+  <style>
+    :root {
+      --primary-color: #07c160;
+      --primary-gradient: linear-gradient(135deg, #07c160 0%, #06ad56 100%);
+      --bg-color: #f7f8fa;
+      --text-color: #323233;
+      --text-secondary: #969799;
+      --border-color: #ebedf0;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--bg-color);
+      min-height: 100vh;
+      color: var(--text-color);
+    }
+    
+    .register-container {
+      min-height: 100vh;
+      background: linear-gradient(180deg, #e8f5e9 0%, #f7f8fa 30%);
+      padding: 60px 24px 40px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* Logo 区域 */
+    .logo-section {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
+    .logo {
+      width: 72px;
+      height: 72px;
+      background: var(--primary-gradient);
+      border-radius: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 24px rgba(7, 193, 96, 0.3);
+    }
+    
+    .logo svg {
+      width: 40px;
+      height: 40px;
+      fill: white;
+    }
+    
+    .app-name {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-color);
+      margin-bottom: 8px;
+    }
+    
+    .app-slogan {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    
+    /* 表单区域 */
+    .form-section {
+      flex: 1;
+    }
+    
+    .form-card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px 20px;
+      box-shadow: 0 2px 12px rgba(100, 101, 102, 0.08);
+    }
+    
+    .form-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-label {
+      display: block;
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+    
+    .form-input {
+      width: 100%;
+      height: 48px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0 16px;
+      font-size: 16px;
+      color: var(--text-color);
+      background: #fafafa;
+      transition: all 0.2s;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      background: white;
+    }
+    
+    .form-input::placeholder {
+      color: #c8c9cc;
+    }
+    
+    /* 验证码输入 */
+    .input-with-btn {
+      display: flex;
+      gap: 12px;
+    }
+    
+    .input-with-btn .form-input {
+      flex: 1;
+    }
+    
+    .code-btn {
+      flex-shrink: 0;
+      height: 48px;
+      padding: 0 16px;
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .code-btn:hover {
+      opacity: 0.9;
+    }
+    
+    .code-btn:disabled {
+      background: #ebedf0;
+      color: #c8c9cc;
+      cursor: not-allowed;
+    }
+    
+    /* 密码输入 */
+    .password-wrapper {
+      position: relative;
+    }
+    
+    .password-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      padding: 8px;
+      cursor: pointer;
+      color: var(--text-secondary);
+    }
+    
+    /* 协议勾选 */
+    .agreement {
+      margin: 20px 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    
+    .agreement input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      margin-top: 2px;
+      accent-color: var(--primary-color);
+    }
+    
+    .agreement-text {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    
+    .agreement-text a {
+      color: var(--primary-color);
+      text-decoration: none;
+    }
+    
+    /* 注册按钮 */
+    .register-btn {
+      width: 100%;
+      height: 48px;
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      border-radius: 24px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(7, 193, 96, 0.3);
+    }
+    
+    .register-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(7, 193, 96, 0.4);
+    }
+    
+    .register-btn:disabled {
+      background: #ebedf0;
+      color: #c8c9cc;
+      box-shadow: none;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    /* 底部登录链接 */
+    .login-link {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    
+    .login-link a {
+      color: var(--primary-color);
+      font-weight: 500;
+      text-decoration: none;
+    }
+    
+    /* 社交登录 */
+    .social-section {
+      margin-top: 40px;
+    }
+    
+    .divider {
+      display: flex;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    
+    .divider-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border-color);
+    }
+    
+    .divider-text {
+      padding: 0 16px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    
+    .social-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+    }
+    
+    .social-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .social-btn:hover {
+      transform: scale(1.05);
+    }
+    
+    .social-btn.wechat {
+      background: #07c160;
+    }
+    
+    .social-btn.apple {
+      background: #000000;
+    }
+    
+    .social-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: white;
+    }
+    
+    /* 密码强度指示 */
+    .password-strength {
+      display: flex;
+      gap: 4px;
+      margin-top: 8px;
+    }
+    
+    .strength-bar {
+      flex: 1;
+      height: 3px;
+      background: #ebedf0;
+      border-radius: 2px;
+      transition: all 0.2s;
+    }
+    
+    .strength-bar.weak {
+      background: #ee0a24;
+    }
+    
+    .strength-bar.medium {
+      background: #ff976a;
+    }
+    
+    .strength-bar.strong {
+      background: #07c160;
+    }
+    
+    .strength-text {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="register-container">
+    <!-- Logo 区域 -->
+    <div class="logo-section">
+      <div class="logo">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+        </svg>
+      </div>
+      <div class="app-name">未来APP</div>
+      <div class="app-slogan">开启智能生活新体验</div>
+    </div>
+    
+    <!-- 表单区域 -->
+    <div class="form-section">
+      <div class="form-card">
+        <div class="form-title">创建账号</div>
+        
+        <!-- 手机号 -->
+        <div class="form-group">
+          <label class="form-label">手机号</label>
+          <input type="tel" class="form-input" id="phone" placeholder="请输入手机号" maxlength="11">
+        </div>
+        
+        <!-- 验证码 -->
+        <div class="form-group">
+          <label class="form-label">验证码</label>
+          <div class="input-with-btn">
+            <input type="text" class="form-input" id="code" placeholder="请输入验证码" maxlength="6">
+            <button class="code-btn" id="sendCode" onclick="sendCode()">获取验证码</button>
+          </div>
+        </div>
+        
+        <!-- 密码 -->
+        <div class="form-group">
+          <label class="form-label">设置密码</label>
+          <div class="password-wrapper">
+            <input type="password" class="form-input" id="password" placeholder="6-20位字母、数字或符号组合" maxlength="20" oninput="checkPassword()">
+            <button class="password-toggle" onclick="togglePassword()">
+              <svg id="eyeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <div class="password-strength" id="strengthBars">
+            <div class="strength-bar" id="bar1"></div>
+            <div class="strength-bar" id="bar2"></div>
+            <div class="strength-bar" id="bar3"></div>
+          </div>
+          <div class="strength-text" id="strengthText"></div>
+        </div>
+        
+        <!-- 确认密码 -->
+        <div class="form-group">
+          <label class="form-label">确认密码</label>
+          <input type="password" class="form-input" id="confirmPassword" placeholder="请再次输入密码" maxlength="20">
+        </div>
+        
+        <!-- 协议 -->
+        <div class="agreement">
+          <input type="checkbox" id="agree">
+          <label class="agreement-text" for="agree">
+            我已阅读并同意 <a href="#">《用户协议》</a> 和 <a href="#">《隐私政策》</a>
+          </label>
+        </div>
+        
+        <!-- 注册按钮 -->
+        <button class="register-btn" id="registerBtn" onclick="handleRegister()">立即注册</button>
+        
+        <!-- 登录链接 -->
+        <div class="login-link">
+          已有账号？<a href="#">立即登录</a>
+        </div>
+      </div>
+      
+      <!-- 社交登录 -->
+      <div class="social-section">
+        <div class="divider">
+          <div class="divider-line"></div>
+          <div class="divider-text">其他方式注册</div>
+          <div class="divider-line"></div>
+        </div>
+        
+        <div class="social-buttons">
+          <!-- 微信 -->
+          <button class="social-btn wechat" onclick="socialRegister('wechat')">
+            <svg viewBox="0 0 24 24">
+              <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.269-.03-.407-.032zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"/>
+            </svg>
+          </button>
+          
+          <!-- Apple -->
+          <button class="social-btn apple" onclick="socialRegister('apple')">
+            <svg viewBox="0 0 24 24">
+              <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Toast 提示 -->
+  <div id="toast" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.7); color: white; padding: 12px 24px; border-radius: 8px; font-size: 14px; z-index: 1000;"></div>
+  
+  <script>
+    // 密码可见性切换
+    let passwordVisible = false;
+    
+    function togglePassword() {
+      const input = document.getElementById('password');
+      const icon = document.getElementById('eyeIcon');
+      passwordVisible = !passwordVisible;
+      
+      if (passwordVisible) {
+        input.type = 'text';
+        icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+      } else {
+        input.type = 'password';
+        icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+      }
+    }
+    
+    // 密码强度检测
+    function checkPassword() {
+      const password = document.getElementById('password').value;
+      const bar1 = document.getElementById('bar1');
+      const bar2 = document.getElementById('bar2');
+      const bar3 = document.getElementById('bar3');
+      const text = document.getElementById('strengthText');
+      
+      // 重置
+      bar1.className = 'strength-bar';
+      bar2.className = 'strength-bar';
+      bar3.className = 'strength-bar';
+      text.textContent = '';
+      
+      if (!password) return;
+      
+      let strength = 0;
+      if (password.length >= 6) strength++;
+      if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+      if (/\d/.test(password)) strength++;
+      if (/[^a-zA-Z\d]/.test(password)) strength++;
+      
+      strength = Math.min(strength, 3);
+      
+      if (strength === 1) {
+        bar1.className = 'strength-bar weak';
+        text.textContent = '弱';
+        text.style.color = '#ee0a24';
+      } else if (strength === 2) {
+        bar1.className = 'strength-bar medium';
+        bar2.className = 'strength-bar medium';
+        text.textContent = '中';
+        text.style.color = '#ff976a';
+      } else if (strength >= 3) {
+        bar1.className = 'strength-bar strong';
+        bar2.className = 'strength-bar strong';
+        bar3.className = 'strength-bar strong';
+        text.textContent = '强';
+        text.style.color = '#07c160';
+      }
+    }
+    
+    // 发送验证码
+    let countdown = 0;
+    
+    function sendCode() {
+      const phone = document.getElementById('phone').value;
+      const btn = document.getElementById('sendCode');
+      
+      if (!/^1[3-9]\d{9}$/.test(phone)) {
+        showToast('请输入正确的手机号');
+        return;
+      }
+      
+      if (countdown > 0) return;
+      
+      // 模拟发送验证码
+      showToast('验证码已发送');
+      countdown = 60;
+      btn.disabled = true;
+      
+      const timer = setInterval(() => {
+        countdown--;
+        if (countdown <= 0) {
+          clearInterval(timer);
+          btn.textContent = '获取验证码';
+          btn.disabled = false;
+        } else {
+          btn.textContent = `${countdown}s`;
+        }
+      }, 1000);
+    }
+    
+    // 注册
+    function handleRegister() {
+      const phone = document.getElementById('phone').value;
+      const code = document.getElementById('code').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const agree = document.getElementById('agree').checked;
+      
+      // 验证
+      if (!/^1[3-9]\d{9}$/.test(phone)) {
+        showToast('请输入正确的手机号');
+        return;
+      }
+      
+      if (!/^\d{4,6}$/.test(code)) {
+        showToast('请输入正确的验证码');
+        return;
+      }
+      
+      if (password.length < 6) {
+        showToast('密码至少6位');
+        return;
+      }
+      
+      if (password !== confirmPassword) {
+        showToast('两次密码不一致');
+        return;
+      }
+      
+      if (!agree) {
+        showToast('请同意用户协议');
+        return;
+      }
+      
+      // 模拟注册
+      showToast('注册成功！');
+      
+      // 2秒后跳转
+      setTimeout(() => {
+        alert('注册成功！即将跳转到首页...');
+      }, 1500);
+    }
+    
+    // 社交注册
+    function socialRegister(type) {
+      if (type === 'wechat') {
+        showToast('正在唤起微信授权...');
+      } else if (type === 'apple') {
+        showToast('正在唤起Apple登录...');
+      }
+    }
+    
+    // Toast 提示
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 2000);
+    }
+  </script>
+</body>
+</html>
