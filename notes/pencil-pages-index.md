@@ -128,4 +128,59 @@
 
 ---
 
-*最后更新：2026-03-30 18:47*
+### 6. AI 对话界面 ⭐ 最新
+- **创建时间**：2026-04-01 09:30
+- **设计系统**：自定义简约风格
+- **预览链接**：https://pencil-designs.pages.dev/ai-chat-interface
+- **设计文件**：/root/.openclaw/workspace/output/pencil-designs/ai-chat-interface.html
+- **功能说明**：
+  - 左侧对话列表（历史记录）
+  - 右侧聊天区域（消息气泡）
+  - 模型选择器
+  - 快捷操作按钮（继续写作、重新生成、复制内容）
+  - 消息输入框 + 发送按钮
+  - Enter 发送 / Shift+Enter 换行
+- **状态**：✅ 已完成
+- **注意**：URL 去掉 `.html` 后缀
+
+---
+
+### 7. 后端登录界面 ⭐ 最新
+- **创建时间**：2026-04-01 10:05
+- **设计系统**：Ant Design 风格
+- **预览链接**：https://pencil-designs.pages.dev/backend-login
+- **设计文件**：/root/.openclaw/workspace/output/pencil-designs/backend-login.html
+- **功能说明**：
+  - 左侧品牌展示区（渐变背景 + 功能特点）
+  - 右侧登录表单（用户名、密码、验证码）
+  - 验证码输入 + 图片刷新
+  - 记住密码、忘记密码入口
+  - 社交登录入口（企业微信、钉钉、飞书）
+  - 表单验证 + 错误提示
+  - 响应式布局
+- **状态**：✅ 已完成
+- **注意**：URL 去掉 `.html` 后缀
+
+---
+
+### 8. APP 注册页面 ⭐ 最新
+- **创建时间**：2026-04-02 16:09
+- **设计系统**：Vant 4（移动端）
+- **预览链接**：https://pencil-designs.pages.dev/app-register
+- **设计文件**：/root/.openclaw/workspace/output/pencil-designs/app-register.html
+- **规格文档**：/root/.openclaw/workspace/output/pencil-designs/prototypes/2026-04-02-app-register/spec.md
+- **截图路径**：/root/.openclaw/workspace/output/pencil-designs/screenshots/app-register.png
+- **功能说明**：
+  - 手机号 + 验证码注册流程
+  - 密码强度实时检测（弱/中/强）
+  - 密码显示/隐藏切换
+  - 完整表单验证（手机号、验证码、密码一致性）
+  - 社交登录入口（微信、Apple）
+  - 用户协议勾选确认
+  - 验证码 60s 倒计时
+- **状态**：✅ 已完成
+- **注意**：URL 去掉 `.html` 后缀，建议用手机查看
+
+---
+
+*最后更新：2026-04-02 16:25*
