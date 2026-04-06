@@ -277,6 +277,11 @@
 
     // 已知的页面元数据（手动维护的高优先级）
     const knownPages = {
+      'report-query.html': {
+        title: '数据报表查询',
+        desc: '支持按订单号、客户、状态、日期范围查询，含统计卡片和数据表格',
+        tags: ['报表', '查询', 'Ant Design']
+      },
       'china-network-dashboard-v2.html': {
         title: '全国网络监控大屏（修复版）',
         desc: '修复地图加载问题，使用 jsdelivr CDN 托管 GeoJSON',
@@ -431,7 +436,8 @@
         'login-element.html',
         'login-page-preview.html',
         'expo-preview.html',
-        'admin-login-antd.html'
+        'admin-login-antd.html',
+        'report-query.html'
       ];
 
       allPages = htmlFiles.map(file => {

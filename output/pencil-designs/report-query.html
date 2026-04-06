@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数据报表查询</title>
+  <link href="https://cdn.jsdelivr.net/npm/antd@5/dist/reset.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/antd@5/dist/antd.min.js"></script>
+  <style>
+    body { background: #f0f2f5; min-height: 100vh; padding: 24px; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .header { background: #fff; padding: 24px; border-radius: 8px; margin-bottom: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+    .header h1 { margin: 0 0 8px 0; font-size: 24px; color: #1f1f1f; }
+    .header p { margin: 0; color: #666; }
+    .search-card { background: #fff; padding: 24px; border-radius: 8px; margin-bottom: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+    .table-card { background: #fff; padding: 24px; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+    .stats-row { display: flex; gap: 16px; margin-bottom: 24px; }
+    .stat-item { flex: 1; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+    .stat-item .label { color: #666; font-size: 14px; margin-bottom: 8px; }
+    .stat-item .value { font-size: 28px; font-weight: 600; color: #1890ff; }
+    .stat-item.success .value { color: #52c41a; }
+    .stat-item.warning .value { color: #faad14; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📊 数据报表查询</h1>
+      <p>查询和导出业务数据报表</p>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-item">
+        <div class="label">今日订单</div>
+        <div class="value">1,234</div>
+      </div>
+      <div class="stat-item success">
+        <div class="label">完成率</div>
+        <div class="value">92.5%</div>
+      </div>
+      <div class="stat-item warning">
+        <div class="label">待处理</div>
+        <div class="value">87</div>
+      </div>
+      <div class="stat-item">
+        <div class="label">本月总额</div>
+        <div class="value">¥128,450</div>
+      </div>
+    </div>
+
+    <div class="search-card">
+      <div id="searchForm"></div>
+    </div>
+
+    <div class="table-card">
+      <div id="dataTable"></div>
+    </div>
+  </div>
+
+  <script>
+    const { Form, Input, Select, DatePicker, Button, Table, Space, Tag, message } = antd;
+    const { RangePicker } = DatePicker;
+
+    // 模拟数据
+    const mockData = [
+      { id: 'ORD001', customer: '张三', product: 'AI助手会员', amount: 299, status: 'completed', date: '2026-04-06' },
+      { id: 'ORD002', customer: '李四', product: 'API调用包', amount: 599, status: 'pending', date: '2026-04-05' },
+      { id: 'ORD003', customer: '王五', product: '企业版订阅', amount: 2999, status: 'completed', date: '2026-04-05' },
+      { id: 'ORD004', customer: '赵六', product: 'AI助手会员', amount: 299, status: 'cancelled', date: '2026-04-04' },
+      { id: 'ORD005', customer: '孙七', product: 'API调用包', amount: 599, status: 'completed', date: '2026-04-04' },
+    ];
+
+    const statusMap = {
+      completed: { color: 'success', text: '已完成' },
+      pending: { color: 'warning', text: '待处理' },
+      cancelled: { color: 'error', text: '已取消' }
+    };
+
+    const columns = [
+      { title: '订单号', dataIndex: 'id', key: 'id' },
+      { title: '客户', dataIndex: 'customer', key: 'customer' },
+      { title: '产品', dataIndex: 'product', key: 'product' },
+      { title: '金额', dataIndex: 'amount', key: 'amount', render: v => `¥${v}` },
+      { title: '状态', dataIndex: 'status', key: 'status', render: v => React.createElement(Tag, { color: statusMap[v].color }, statusMap[v].text) },
+      { title: '日期', dataIndex: 'date', key: 'date' },
+      { title: '操作', key: 'action', render: () => React.createElement(Space, null, 
+        React.createElement(Button, { type: 'link', size: 'small' }, '详情'),
+        React.createElement(Button, { type: 'link', size: 'small' }, '导出')
+      )}
+    ];
+
+    // 搜索表单
+    class SearchForm extends React.Component {
+      formRef = React.createRef();
+
+      onFinish = (values) => {
+        message.success('查询成功！');
+        console.log('Search:', values);
+      };
+
+      onReset = () => {
+        this.formRef.current?.resetFields();
+      };
+
+      render() {
+        return React.createElement(Form, { ref: this.formRef, layout: 'inline', onFinish: this.onFinish },
+          React.createElement(Form.Item, { name: 'orderId', label: '订单号' },
+            React.createElement(Input, { placeholder: '请输入订单号', allowClear: true })
+          ),
+          React.createElement(Form.Item, { name: 'customer', label: '客户' },
+            React.createElement(Input, { placeholder: '请输入客户名', allowClear: true })
+          ),
+          React.createElement(Form.Item, { name: 'status', label: '状态' },
+            React.createElement(Select, { placeholder: '请选择', style: { width: 120 }, allowClear: true, options: [
+              { value: 'completed', label: '已完成' },
+              { value: 'pending', label: '待处理' },
+              { value: 'cancelled', label: '已取消' }
+            ]})
+          ),
+          React.createElement(Form.Item, { name: 'dateRange', label: '日期' },
+            React.createElement(RangePicker)
+          ),
+          React.createElement(Form.Item, null,
+            React.createElement(Space, null,
+              React.createElement(Button, { type: 'primary', htmlType: 'submit' }, '查询'),
+              React.createElement(Button, { onClick: this.onReset }, '重置'),
+              React.createElement(Button, { type: 'default' }, '导出Excel')
+            )
+          )
+        );
+      }
+    }
+
+    // 表格组件
+    class DataTable extends React.Component {
+      state = { loading: false, data: mockData };
+
+      render() {
+        return React.createElement(Table, {
+          columns: columns,
+          dataSource: this.state.data,
+          rowKey: 'id',
+          loading: this.state.loading,
+          pagination: { pageSize: 10, showTotal: (total) => `共 ${total} 条` }
+        });
+      }
+    }
+
+    // 渲染
+    ReactDOM.render(React.createElement(SearchForm), document.getElementById('searchForm'));
+    ReactDOM.render(React.createElement(DataTable), document.getElementById('dataTable'));
+  </script>
+</body>
+</html>
