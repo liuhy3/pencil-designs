@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数据管理 - Vue Element Plus</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://unpkg.com/element-plus"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f2f5;min-height:100vh}
+
+    /* ===== 顶部导航 ===== */
+    .top-nav{height:56px;background:#fff;border-bottom:1px solid #e8e8e8;display:flex;align-items:center;padding:0 24px;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+    .nav-logo{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:700;color:#1e293b}
+    .nav-logo .logo-icon{width:32px;height:32px;background:linear-gradient(135deg,#409eff,#79bbff);border-radius:8px;display:flex;align-items:center;justify-content:center}
+    .nav-logo .logo-icon .material-icons-outlined{font-size:20px;color:#fff}
+    .nav-menu{display:flex;gap:4px;margin-left:40px}
+    .nav-item{padding:8px 16px;font-size:14px;color:#64748b;cursor:pointer;border-radius:6px;transition:all .2s;border:none;background:transparent;font-family:inherit}
+    .nav-item:hover{background:#f1f5f9;color:#1e293b}
+    .nav-item.active{background:#ecf5ff;color:#409eff;font-weight:500}
+    .nav-right{margin-left:auto;display:flex;align-items:center;gap:16px}
+    .nav-bell{position:relative;cursor:pointer;color:#64748b;transition:color .2s}
+    .nav-bell:hover{color:#409eff}
+    .nav-bell .badge{position:absolute;top:-4px;right:-6px;width:16px;height:16px;background:#f56c6c;border-radius:50%;font-size:10px;color:#fff;display:flex;align-items:center;justify-content:center}
+    .nav-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#409eff,#79bbff);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:600;cursor:pointer}
+    .nav-user{font-size:13px;color:#64748b}
+
+    /* ===== 内容区 ===== */
+    .page-content{padding:20px 24px}
+
+    /* 面包屑 */
+    .breadcrumb{font-size:13px;color:#94a3b8;margin-bottom:16px}
+    .breadcrumb span{color:#409eff;cursor:pointer}
+    .breadcrumb span:hover{text-decoration:underline}
+
+    /* 卡片容器 */
+    .page-card{background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+
+    /* ===== 搜索区 ===== */
+    .search-bar{padding:20px 20px 0}
+    .search-form{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+    .search-item{display:flex;flex-direction:column;gap:6px}
+    .search-item label{font-size:13px;color:#64748b;font-weight:500}
+    .search-item .el-input,.search-item .el-select{width:200px}
+    .search-item .el-input__wrapper{border-radius:6px}
+    .search-btns{display:flex;gap:8px;padding-bottom:20px;margin-left:8px}
+    .search-btns .el-button{border-radius:6px}
+
+    /* ===== 工具栏 ===== */
+    .toolbar{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-top:1px solid #f0f0f0;border-bottom:1px solid #f0f0f0}
+    .toolbar-left{display:flex;gap:10px}
+    .toolbar-left .el-button{border-radius:6px}
+    .toolbar-right{display:flex;gap:8px;align-items:center}
+    .toolbar-right .el-button{border-radius:6px}
+
+    /* ===== 表格 ===== */
+    .table-area{padding:0 20px 20px}
+    .el-table{border-radius:0;font-size:13px}
+    .el-table th.el-table__cell{background:#fafafa;font-weight:600;color:#1e293b;font-size:13px}
+    .el-table td.el-table__cell{padding:12px 0}
+
+    /* 状态标签 */
+    .status-tag{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:10px;font-size:12px;font-weight:500}
+    .status-tag.active{background:#e1f3d8;color:#67c23a}
+    .status-tag.inactive{background:#fde2e2;color:#f56c6c}
+    .status-tag.pending{background:#faecd8;color:#e6a23c}
+    .status-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+    /* 操作链接 */
+    .action-link{color:#409eff;cursor:pointer;font-size:13px;text-decoration:none;margin:0 4px}
+    .action-link:hover{text-decoration:underline;color:#337ecc}
+    .action-link.danger{color:#f56c6c}
+    .action-link.danger:hover{color:#c45656}
+
+    /* ===== 分页 ===== */
+    .pagination-bar{display:flex;justify-content:flex-end;align-items:center;padding:16px 20px;border-top:1px solid #f0f0f0;gap:16px}
+    .pagination-info{font-size:13px;color:#94a3b8}
+    .el-pagination{font-size:13px}
+
+    /* ===== 新增弹窗 ===== */
+    .el-dialog{border-radius:10px!important}
+    .el-dialog__header{border-bottom:1px solid #f0f0f0;padding-bottom:16px!important}
+    .el-dialog__title{font-size:16px;font-weight:600;color:#1e293b}
+    .el-dialog__body{padding:24px!important}
+    .dialog-form .el-form-item{margin-bottom:20px}
+    .dialog-form .el-input__wrapper,.dialog-form .el-textarea__inner{border-radius:6px}
+    .dialog-form .el-select{width:100%}
+    .dialog-footer{display:flex;justify-content:flex-end;gap:10px}
+    .dialog-footer .el-button{border-radius:6px;min-width:80px}
+
+    /* ===== 导出下拉 ===== */
+    .export-dropdown{min-width:140px}
+
+    /* 响应式 */
+    @media(max-width:768px){
+      .search-form{flex-direction:column}
+      .search-item .el-input,.search-item .el-select{width:100%}
+      .toolbar{flex-direction:column;gap:10px;align-items:flex-start}
+      .page-content{padding:12px}
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <!-- 顶部导航 -->
+  <div class="top-nav">
+    <div class="nav-logo">
+      <div class="logo-icon"><span class="material-icons-outlined">hub</span></div>
+      CloudNova
+    </div>
+    <div class="nav-menu">
+      <button class="nav-item" @click="ElMessage.info('首页')">首页</button>
+      <button class="nav-item active">数据管理</button>
+      <button class="nav-item" @click="ElMessage.info('系统设置')">系统设置</button>
+      <button class="nav-item" @click="ElMessage.info('日志审计')">日志审计</button>
+    </div>
+    <div class="nav-right">
+      <div class="nav-bell" @click="ElMessage.info('暂无新通知')">
+        <span class="material-icons-outlined" style="font-size:22px">notifications</span>
+        <div class="badge">3</div>
+      </div>
+      <div class="nav-avatar">A</div>
+      <span class="nav-user">Admin</span>
+    </div>
+  </div>
+
+  <!-- 内容 -->
+  <div class="page-content">
+    <div class="breadcrumb">首页 / <span>数据管理</span></div>
+
+    <div class="page-card">
+      <!-- 搜索区 -->
+      <div class="search-bar">
+        <div class="search-form">
+          <div class="search-item">
+            <label>名称</label>
+            <el-input v-model="search.name" placeholder="请输入名称" clearable size="default" />
+          </div>
+          <div class="search-item">
+            <label>编号</label>
+            <el-input v-model="search.code" placeholder="请输入编号" clearable size="default" />
+          </div>
+          <div class="search-item">
+            <label>状态</label>
+            <el-select v-model="search.status" placeholder="全部" clearable size="default">
+              <el-option label="已启用" value="active" />
+              <el-option label="已停用" value="inactive" />
+              <el-option label="待审核" value="pending" />
+            </el-select>
+          </div>
+          <div class="search-item">
+            <label>创建时间</label>
+            <el-date-picker v-model="search.dateRange" type="daterange" range-separator="至" start-placeholder="开始" end-placeholder="结束" size="default" style="width:240px" value-format="YYYY-MM-DD" />
+          </div>
+          <div class="search-btns">
+            <el-button type="primary" @click="handleSearch"><span class="material-icons-outlined" style="font-size:16px;margin-right:4px;vertical-align:middle">search</span>查询</el-button>
+            <el-button @click="handleReset"><span class="material-icons-outlined" style="font-size:16px;margin-right:4px;vertical-align:middle">refresh</span>重置</el-button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 工具栏 -->
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <el-button type="primary" @click="openAddDialog">
+            <span class="material-icons-outlined" style="font-size:16px;margin-right:4px;vertical-align:middle">add</span>新增
+          </el-button>
+          <el-button type="danger" plain @click="handleBatchDelete" :disabled="!selectedRows.length">
+            <span class="material-icons-outlined" style="font-size:16px;margin-right:4px;vertical-align:middle">delete</span>批量删除
+          </el-button>
+        </div>
+        <div class="toolbar-right">
+          <el-dropdown trigger="click" @command="handleExport">
+            <el-button>
+              <span class="material-icons-outlined" style="font-size:16px;margin-right:4px;vertical-align:middle">download</span>导出
+              <span class="material-icons-outlined" style="font-size:16px;margin-left:2px;vertical-align:middle">arrow_drop_down</span>
+            </el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="xlsx">
+                  <span class="material-icons-outlined" style="font-size:16px;vertical-align:middle;color:#67c23a;margin-right:6px">description</span>导出 Excel
+                </el-dropdown-item>
+                <el-dropdown-item command="csv">
+                  <span class="material-icons-outlined" style="font-size:16px;vertical-align:middle;color:#409eff;margin-right:6px">table_chart</span>导出 CSV
+                </el-dropdown-item>
+                <el-dropdown-item command="pdf">
+                  <span class="material-icons-outlined" style="font-size:16px;vertical-align:middle;color:#f56c6c;margin-right:6px">picture_as_pdf</span>导出 PDF
+                </el-dropdown-item>
+                <el-dropdown-item command="json" divided>
+                  <span class="material-icons-outlined" style="font-size:16px;vertical-align:middle;color:#e6a23c;margin-right:6px">data_object</span>导出 JSON
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+          <el-button @click="handleRefresh">
+            <span class="material-icons-outlined" style="font-size:16px;margin-right:4px;vertical-align:middle">sync</span>刷新
+          </el-button>
+        </div>
+      </div>
+
+      <!-- 表格 -->
+      <div class="table-area">
+        <el-table :data="tableData" stripe style="width:100%" @selection-change="handleSelectionChange" v-loading="tableLoading" empty-text="暂无数据">
+          <el-table-column type="selection" width="50" align="center" />
+          <el-table-column type="index" label="序号" width="60" align="center" />
+          <el-table-column prop="name" label="名称" min-width="140" show-overflow-tooltip />
+          <el-table-column prop="code" label="编号" width="150" />
+          <el-table-column prop="category" label="类型" width="120" />
+          <el-table-column prop="department" label="所属部门" width="130" />
+          <el-table-column prop="status" label="状态" width="100" align="center">
+            <template #default="{row}">
+              <span class="status-tag" :class="row.status">
+                <span class="status-dot"></span>
+                {{statusMap[row.status]}}
+              </span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="creator" label="创建人" width="100" />
+          <el-table-column prop="createdAt" label="创建时间" width="170" sortable />
+          <el-table-column label="操作" width="180" fixed="right" align="center">
+            <template #default="{row}">
+              <a class="action-link" @click="handleView(row)">查看</a>
+              <a class="action-link" @click="handleEdit(row)">编辑</a>
+              <a class="action-link danger" @click="handleDelete(row)">删除</a>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+
+      <!-- 分页 -->
+      <div class="pagination-bar">
+        <span class="pagination-info">共 {{total}} 条记录</span>
+        <el-pagination
+          v-model:current-page="pagination.page"
+          v-model:page-size="pagination.size"
+          :page-sizes="[10,20,50,100]"
+          :total="total"
+          layout="sizes, prev, pager, next, jumper"
+          background
+          @size-change="handlePageChange"
+          @current-change="handlePageChange"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- 新增/编辑弹窗 -->
+  <el-dialog v-model="dialogVisible" :title="dialogMode==='add'?'新增记录':'编辑记录'" width="580px" :close-on-click-modal="false" destroy-on-close>
+    <el-form ref="formRef" :model="formData" :rules="formRules" label-width="90px" class="dialog-form">
+      <el-form-item label="名称" prop="name">
+        <el-input v-model="formData.name" placeholder="请输入名称" maxlength="50" show-word-limit />
+      </el-form-item>
+      <el-form-item label="编号" prop="code">
+        <el-input v-model="formData.code" placeholder="请输入编号" maxlength="30" />
+      </el-form-item>
+      <el-form-item label="类型" prop="category">
+        <el-select v-model="formData.category" placeholder="请选择类型">
+          <el-option label="服务器" value="服务器" />
+          <el-option label="网络设备" value="网络设备" />
+          <el-option label="存储设备" value="存储设备" />
+          <el-option label="安全设备" value="安全设备" />
+          <el-option label="其他" value="其他" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="所属部门" prop="department">
+        <el-select v-model="formData.department" placeholder="请选择部门">
+          <el-option label="运维部" value="运维部" />
+          <el-option label="研发部" value="研发部" />
+          <el-option label="市场部" value="市场部" />
+          <el-option label="产品部" value="产品部" />
+          <el-option label="财务部" value="财务部" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="状态" prop="status">
+        <el-radio-group v-model="formData.status">
+          <el-radio value="active">启用</el-radio>
+          <el-radio value="inactive">停用</el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item label="备注" prop="remark">
+        <el-input v-model="formData.remark" type="textarea" :rows="3" placeholder="请输入备注" maxlength="200" show-word-limit />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="dialogVisible=false">取 消</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="handleSubmit">确 定</el-button>
+      </div>
+    </template>
+  </el-dialog>
+
+  <!-- 查看详情弹窗 -->
+  <el-dialog v-model="detailVisible" title="查看详情" width="560px">
+    <el-descriptions :column="2" border size="default" v-if="detailData">
+      <el-descriptions-item label="名称">{{detailData.name}}</el-descriptions-item>
+      <el-descriptions-item label="编号">{{detailData.code}}</el-descriptions-item>
+      <el-descriptions-item label="类型">{{detailData.category}}</el-descriptions-item>
+      <el-descriptions-item label="所属部门">{{detailData.department}}</el-descriptions-item>
+      <el-descriptions-item label="状态">
+        <span class="status-tag" :class="detailData.status"><span class="status-dot"></span>{{statusMap[detailData.status]}}</span>
+      </el-descriptions-item>
+      <el-descriptions-item label="创建人">{{detailData.creator}}</el-descriptions-item>
+      <el-descriptions-item label="创建时间" :span="2">{{detailData.createdAt}}</el-descriptions-item>
+      <el-descriptions-item label="备注" :span="2">{{detailData.remark||'无'}}</el-descriptions-item>
+    </el-descriptions>
+    <template #footer>
+      <el-button @click="detailVisible=false" type="primary">关 闭</el-button>
+    </template>
+  </el-dialog>
+</div>
+
+<script>
+const{createApp,ref,reactive,onMounted}=Vue;
+const app=createApp({
+  setup(){
+    const statusMap={active:'已启用',inactive:'已停用',pending:'待审核'};
+
+    // 搜索
+    const search=reactive({name:'',code:'',status:'',dateRange:null});
+    const tableLoading=ref(false);
+    const selectedRows=ref([]);
+
+    // 分页
+    const pagination=reactive({page:1,size:10});
+    const total=ref(0);
+
+    // 表格数据
+    const tableData=ref([]);
+    const mockData=[
+      {id:1,name:'核心交换机-A01',code:'NET-2026-001',category:'网络设备',department:'运维部',status:'active',creator:'张三',createdAt:'2026-03-15 10:30:00',remark:'核心层设备'},
+      {id:2,name:'汇聚交换机-B01',code:'NET-2026-002',category:'网络设备',department:'运维部',status:'active',creator:'李四',createdAt:'2026-03-16 14:20:00',remark:''},
+      {id:3,name:'防火墙-C01',code:'SEC-2026-001',category:'安全设备',department:'运维部',status:'active',creator:'王五',createdAt:'2026-03-18 09:15:00',remark:'边界防火墙'},
+      {id:4,name:'应用服务器-D01',code:'SRV-2026-001',category:'服务器',department:'研发部',status:'pending',creator:'赵六',createdAt:'2026-03-20 11:00:00',remark:'待审核'},
+      {id:5,name:'数据库服务器-D02',code:'SRV-2026-002',category:'服务器',department:'研发部',status:'active',creator:'孙七',createdAt:'2026-03-21 16:45:00',remark:'MySQL主库'},
+      {id:6,name:'存储阵列-E01',code:'STG-2026-001',category:'存储设备',department:'运维部',status:'inactive',creator:'周八',createdAt:'2026-03-22 08:30:00',remark:'已下线'},
+      {id:7,name:'接入交换机-F01',code:'NET-2026-003',category:'网络设备',department:'运维部',status:'active',creator:'吴九',createdAt:'2026-03-25 13:20:00',remark:''},
+      {id:8,name:'负载均衡-G01',code:'NET-2026-004',category:'网络设备',department:'运维部',status:'active',creator:'郑十',createdAt:'2026-03-28 10:00:00',remark:'Nginx集群'},
+      {id:9,name:'日志服务器-H01',code:'SRV-2026-003',category:'服务器',department:'研发部',status:'pending',creator:'张三',createdAt:'2026-04-01 15:30:00',remark:'ELK平台'},
+      {id:10,name:'备份服务器-I01',code:'SRV-2026-004',category:'服务器',department:'运维部',status:'active',creator:'李四',createdAt:'2026-04-02 09:00:00',remark:'NFS备份'},
+      {id:11,name:'WAF防火墙-J01',code:'SEC-2026-002',category:'安全设备',department:'运维部',status:'active',creator:'王五',createdAt:'2026-04-03 14:15:00',remark:'Web应用防火墙'},
+      {id:12,name:'NAS存储-K01',code:'STG-2026-002',category:'存储设备',department:'市场部',status:'inactive',creator:'赵六',createdAt:'2026-04-04 11:45:00',remark:'文件共享'},
+    ];
+
+    function loadData(){
+      tableLoading.value=true;
+      setTimeout(()=>{
+        let data=[...mockData];
+        if(search.name)data=data.filter(d=>d.name.includes(search.name));
+        if(search.code)data=data.filter(d=>d.code.includes(search.code));
+        if(search.status)data=data.filter(d=>d.status===search.status);
+        total.value=data.length;
+        const start=(pagination.page-1)*pagination.size;
+        tableData.value=data.slice(start,start+pagination.size);
+        tableLoading.value=false;
+      },400)
+    }
+
+    function handleSearch(){pagination.page=1;loadData()}
+    function handleReset(){search.name='';search.code='';search.status='';search.dateRange=null;pagination.page=1;loadData()}
+    function handleRefresh(){loadData();ElMessage.success('刷新成功')}
+    function handlePageChange(){loadData()}
+    function handleSelectionChange(rows){selectedRows.value=rows}
+
+    // 新增/编辑
+    const dialogVisible=ref(false);
+    const dialogMode=ref('add');
+    const submitLoading=ref(false);
+    const formRef=ref(null);
+    const formData=reactive({name:'',code:'',category:'',department:'',status:'active',remark:''});
+    const formRules={
+      name:[{required:true,message:'请输入名称',trigger:'blur'}],
+      code:[{required:true,message:'请输入编号',trigger:'blur'}],
+      category:[{required:true,message:'请选择类型',trigger:'change'}],
+      department:[{required:true,message:'请选择部门',trigger:'change'}],
+      status:[{required:true,message:'请选择状态',trigger:'change'}]
+    };
+
+    function resetForm(){formData.name='';formData.code='';formData.category='';formData.department='';formData.status='active';formData.remark=''}
+    function openAddDialog(){dialogMode.value='add';resetForm();dialogVisible.value=true}
+    function handleEdit(row){dialogMode.value='edit';Object.assign(formData,{name:row.name,code:row.code,category:row.category,department:row.department,status:row.status,remark:row.remark});dialogVisible.value=true}
+    function handleSubmit(){
+      formRef.value.validate(valid=>{
+        if(!valid)return;
+        submitLoading.value=true;
+        setTimeout(()=>{
+          submitLoading.value=false;dialogVisible.value=false;
+          ElMessage.success(dialogMode.value==='add'?'新增成功':'编辑成功');
+          loadData();
+        },800)
+      })
+    }
+
+    // 查看
+    const detailVisible=ref(false);
+    const detailData=ref(null);
+    function handleView(row){detailData.value=row;detailVisible.value=true}
+
+    // 删除
+    function handleDelete(row){ElMessageBox.confirm(`确定删除「${row.name}」吗？`,'提示',{type:'warning',confirmButtonText:'确定',cancelButtonText:'取消'}).then(()=>{ElMessage.success('删除成功');loadData()}).catch(()=>{})}
+    function handleBatchDelete(){ElMessageBox.confirm(`确定删除选中的 ${selectedRows.value.length} 条记录吗？`,'提示',{type:'warning'}).then(()=>{ElMessage.success('批量删除成功');loadData()}).catch(()=>{})}
+
+    // 导出
+    function handleExport(type){
+      const names={xlsx:'Excel',csv:'CSV',pdf:'PDF',json:'JSON'};
+      ElMessage.success(`正在导出 ${names[type]} 文件，请稍候...`);
+      setTimeout(()=>ElMessage.success(`${names[type]} 导出成功！`),1500)
+    }
+
+    onMounted(()=>loadData());
+
+    return{statusMap,search,tableLoading,selectedRows,pagination,total,tableData,
+      handleSearch,handleReset,handleRefresh,handlePageChange,handleSelectionChange,
+      dialogVisible,dialogMode,submitLoading,formRef,formData,formRules,
+      openAddDialog,handleEdit,handleSubmit,
+      detailVisible,detailData,handleView,
+      handleDelete,handleBatchDelete,handleExport}
+  }
+});
+app.use(ElementPlus);
+app.mount('#app');
+</script>
+</body>
+</html>
