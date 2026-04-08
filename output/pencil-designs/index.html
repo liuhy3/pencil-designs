@@ -366,6 +366,11 @@
         title: '数据管理页面（Element Plus）',
         desc: '完整的数据管理后台页面，含搜索筛选、新增/编辑/删除/查看详情、多格式导出（Excel/CSV/PDF/JSON）、分页',
         tags: ['后台', '表格', 'Vue', '导出']
+      },
+      'port-group-management.html': {
+        title: '端口组管理',
+        desc: '端口组管理后台页面，含搜索筛选（名称/标签/设备名/正则）、新增/编辑/删除操作、数据表格（含带宽和端口列）、分页',
+        tags: ['后台', '表格', '端口组', '管理']
       }
     };
 
@@ -425,6 +430,7 @@
       // 已知页面列表（Cloudflare Pages 不支持目录扫描，需要手动维护或用 API）
       // 这里列出所有已知文件
       const htmlFiles = [
+        'port-group-management.html',
         'data-management.html',
         'vue-login.html',
         'admin-login-simple.html',

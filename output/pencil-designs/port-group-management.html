@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>端口组管理</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Microsoft YaHei', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #eef2f7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .canvas {
+      width: 1200px;
+      height: 700px;
+      background: #eef2f7;
+      position: relative;
+      overflow: hidden;
+    }
+    .container {
+      background: #fff;
+      border-radius: 6px;
+      margin: 16px;
+      height: calc(100% - 32px);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    /* 标题栏 */
+    .title-bar {
+      background: #e5eff8;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid #d0dce8;
+      flex-shrink: 0;
+    }
+    .title-icon {
+      width: 20px;
+      height: 20px;
+      background: #3378EB;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    .title-text {
+      font-size: 15px;
+      font-weight: 700;
+      color: #3378EB;
+    }
+
+    /* 内容区 */
+    .content {
+      flex: 1;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* 搜索表单 */
+    .search-form {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 12px;
+      flex-shrink: 0;
+      flex-wrap: nowrap;
+    }
+    .form-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .form-label {
+      font-size: 12px;
+      color: #404040;
+      white-space: nowrap;
+    }
+    .form-input, .form-select {
+      height: 30px;
+      padding: 0 10px;
+      border: 1px solid #d0d5dd;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #404040;
+      background: #fff;
+      outline: none;
+      font-family: inherit;
+    }
+    .form-input {
+      width: 140px;
+    }
+    .form-select {
+      width: 140px;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%23999' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      padding-right: 26px;
+    }
+    .form-input::placeholder {
+      color: #b0b0b0;
+    }
+    .btn {
+      height: 30px;
+      padding: 0 16px;
+      border: none;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: #3378EB;
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: #2d6ad6;
+    }
+    .btn-search {
+      margin-left: auto;
+    }
+
+    /* 操作按钮 */
+    .action-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-shrink: 0;
+    }
+    .action-btn {
+      width: 26px;
+      height: 26px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1;
+    }
+    .action-btn.add {
+      background: #6ba3f0;
+    }
+    .action-btn.edit {
+      background: #f0a04b;
+    }
+    .action-btn.delete {
+      background: #e8584f;
+    }
+
+    /* 数据表格 */
+    .table-wrapper {
+      flex: 1;
+      overflow: auto;
+      border: 1px solid #e0e4ea;
+      border-radius: 4px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    thead {
+      background: #3378EB;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    thead th {
+      height: 36px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #fff;
+      text-align: center;
+      border-right: 1px solid rgba(255,255,255,0.2);
+      padding: 0 6px;
+      white-space: nowrap;
+    }
+    thead th:last-child {
+      border-right: none;
+    }
+    tbody td {
+      height: 34px;
+      font-size: 11px;
+      color: #404040;
+      text-align: center;
+      border-bottom: 1px solid #ebeef2;
+      border-right: 1px solid #f0f2f5;
+      padding: 0 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    tbody td:last-child {
+      border-right: none;
+    }
+    tbody tr.row-highlight {
+      background: #fff7d1;
+    }
+    tbody tr:hover:not(.row-empty) {
+      background: #f5f8fc;
+    }
+    tbody tr.row-highlight:hover {
+      background: #fff0c0;
+    }
+    tbody tr.row-empty td {
+      color: transparent;
+    }
+    .checkbox-cell {
+      width: 36px;
+      text-align: center !important;
+    }
+    .checkbox {
+      width: 14px;
+      height: 14px;
+      border: 1.5px solid #c0c4cc;
+      border-radius: 2px;
+      display: inline-block;
+      vertical-align: middle;
+      position: relative;
+    }
+    .col-seq { width: 50px; }
+    .col-name { width: 120px; }
+    .col-device-regex { width: 120px; }
+    .col-device-attr { width: 110px; }
+    .col-port-regex { width: 120px; }
+    .col-circuit-attr { width: 110px; }
+    .col-port-label { width: 100px; }
+    .col-bandwidth { width: 110px; }
+    .col-ports { width: 70px; }
+
+    /* 分页 */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      padding: 12px 20px 0;
+      flex-shrink: 0;
+    }
+    .page-total {
+      font-size: 12px;
+      color: #606266;
+      margin-right: 8px;
+    }
+    .page-btn {
+      min-width: 28px;
+      height: 28px;
+      border: 1px solid #d0d5dd;
+      border-radius: 4px;
+      background: #fff;
+      font-size: 12px;
+      color: #404040;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 6px;
+      font-family: inherit;
+    }
+    .page-btn.active {
+      background: #3378EB;
+      color: #fff;
+      border-color: #3378EB;
+    }
+    .page-btn:hover:not(.active) {
+      border-color: #3378EB;
+      color: #3378EB;
+    }
+  </style>
+</head>
+<body>
+  <div class="canvas">
+    <div class="container">
+      <!-- 标题栏 -->
+      <div class="title-bar">
+        <div class="title-icon"></div>
+        <span class="title-text">端口组管理</span>
+      </div>
+
+      <!-- 内容区 -->
+      <div class="content">
+        <!-- 搜索表单 -->
+        <div class="search-form">
+          <div class="form-group">
+            <label class="form-label">端口组名称</label>
+            <input class="form-input" type="text" placeholder="请输入端口组名称">
+          </div>
+          <div class="form-group">
+            <label class="form-label">端口组标签</label>
+            <select class="form-select">
+              <option value="">请选择</option>
+              <option>Label-1</option>
+              <option>Label-2</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">设备名称</label>
+            <input class="form-input" type="text" placeholder="请输入设备名称">
+          </div>
+          <div class="form-group">
+            <label class="form-label">设备名正则</label>
+            <input class="form-input" type="text" placeholder="请输入正则表达式">
+          </div>
+          <button class="btn btn-primary">查询</button>
+          <button class="btn btn-primary">条件组管理</button>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="action-bar">
+          <button class="action-btn add" title="新增">+</button>
+          <button class="action-btn edit" title="编辑">✎</button>
+          <button class="action-btn delete" title="删除">✕</button>
+        </div>
+
+        <!-- 数据表格 -->
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th class="checkbox-cell"><div class="checkbox"></div></th>
+                <th class="col-seq">序号</th>
+                <th class="col-name">端口组名称</th>
+                <th class="col-device-regex">设备名正则</th>
+                <th class="col-device-attr">设备属性</th>
+                <th class="col-port-regex">设备端口正则</th>
+                <th class="col-circuit-attr">电路属性</th>
+                <th class="col-port-label">端口标签</th>
+                <th class="col-bandwidth">带宽</th>
+                <th class="col-ports">端口</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="row-highlight">
+                <td class="checkbox-cell"><div class="checkbox"></div></td>
+                <td>1</td>
+                <td>C-I端口组</td>
+                <td>^(SW|SW-)</td>
+                <td>核心交换机</td>
+                <td>^(GE|XGE)</td>
+                <td>电路属性A</td>
+                <td>Label-1</td>
+                <td>6.53 Tbps</td>
+                <td>128</td>
+              </tr>
+              <tr>
+                <td class="checkbox-cell"><div class="checkbox"></div></td>
+                <td>2</td>
+                <td>端口组-2</td>
+                <td>^(RT|RT-)</td>
+                <td>汇聚路由器</td>
+                <td>^(GE|10GE)</td>
+                <td>电路属性B</td>
+                <td>Label-2</td>
+                <td>3.21 Tbps</td>
+                <td>64</td>
+              </tr>
+              <tr>
+                <td class="checkbox-cell"><div class="checkbox"></div></td>
+                <td>3</td>
+                <td>端口组-3</td>
+                <td>^(OLT|OLT-)</td>
+                <td>接入设备</td>
+                <td>^(PON|GE)</td>
+                <td>电路属性C</td>
+                <td>Label-3</td>
+                <td>1.08 Tbps</td>
+                <td>256</td>
+              </tr>
+              <tr class="row-empty"><td></td><td>4</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+              <tr class="row-empty"><td></td><td>5</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+              <tr class="row-empty"><td></td><td>6</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+              <tr class="row-empty"><td></td><td>7</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+              <tr class="row-empty"><td></td><td>8</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+              <tr class="row-empty"><td></td><td>9</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+              <tr class="row-empty"><td></td><td>10</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 分页 -->
+        <div class="pagination">
+          <span class="page-total">共 3 条</span>
+          <button class="page-btn active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn">3</button>
+          <button class="page-btn">4</button>
+          <button class="page-btn">5</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
